@@ -1,0 +1,32 @@
+{
+  "source": {
+    "path": "longbeach2024_action.mp4",
+    "size_bytes": 730107656,
+    "metadata": {
+      "path": "longbeach2024_action.mp4",
+      "url": "https://www.youtube.com/watch?v=nobounLesY4",
+      "event": "Long Beach 2024",
+      "title": "Formula DRIFT Long Beach Top 16 ALL ACTION",
+      "reuse_status": "not verified; local file supplied by user",
+      "width": 1280,
+      "height": 720,
+      "fps": 30,
+      "duration_seconds": 6682.4667
+    },
+    "sha256": "fdc9d4f8d4a8226affa4405164529de4e4bcdeafbd14c2aa19d09be8668da84f",
+    "modified_ns": 1790946328550097800
+  },
+  "annotations_sha256": "6c268dca045b1ba635232eb37808c7ff17827b6cc5c918f6762c3a3debec80cb",
+  "weights_sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+  "settings": {
+    "imgsz": 416,
+    "target_fps": 10,
+    "confidence": 0.15,
+    "trackers": [
+      "bytetrack",
+      "botsort"
+    ],
+    "device": "cpu",
+    "torch_threads": 2
+  }
+}

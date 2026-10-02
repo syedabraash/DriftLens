@@ -1,0 +1,886 @@
+{
+  "coordinate_space": "source_pixels",
+  "width": 1280,
+  "height": 720,
+  "annotation_method": "Visual reference boxes drafted by AI assistant, independently of detector predictions; approximate visible extents; no human expert review",
+  "identity_notes": {
+    "clip01": "car_a white red roof black green side; car_b white blue",
+    "clip07": "car_a green; car_b orange blue",
+    "clip08": "car_a green; car_b orange blue",
+    "clip09": "car_a black; car_b blue white",
+    "clip10": "car_a black; car_b blue white",
+    "clip11": "car_a yellow; car_b red",
+    "clip12": "car_a yellow; car_b red"
+  },
+  "limitations": "Sparse frames from one event and one broadcast. Partial boxes use visible extents and are subjective. No fully hidden car positions are labeled. No human expert has validated the visual reference boxes or identity assignments. This is a small diagnostic evaluation, not a certified ground truth benchmark or dense identity audit.",
+  "samples": [
+    {
+      "clip_id": "clip01",
+      "time_seconds": 0.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            760,
+            320,
+            940,
+            443
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            278,
+            294,
+            451,
+            423
+          ],
+          "visibility": "visible"
+        }
+      ],
+      "split": "tune",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip01_sample0.jpg"
+    },
+    {
+      "clip_id": "clip01",
+      "time_seconds": 1.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            654,
+            274,
+            837,
+            406
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            334,
+            243,
+            511,
+            379
+          ],
+          "visibility": "visible"
+        }
+      ],
+      "split": "tune",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip01_sample1.jpg"
+    },
+    {
+      "clip_id": "clip01",
+      "time_seconds": 2.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            690,
+            265,
+            900,
+            412
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            414,
+            224,
+            628,
+            366
+          ],
+          "visibility": "visible"
+        }
+      ],
+      "split": "tune",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip01_sample2.jpg"
+    },
+    {
+      "clip_id": "clip01",
+      "time_seconds": 3.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            591,
+            251,
+            946,
+            422
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            508,
+            193,
+            804,
+            339
+          ],
+          "visibility": "partial"
+        }
+      ],
+      "split": "tune",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip01_sample3.jpg"
+    },
+    {
+      "clip_id": "clip07",
+      "time_seconds": 0.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            924,
+            384,
+            1076,
+            484
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            382,
+            380,
+            530,
+            477
+          ],
+          "visibility": "visible"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip07_sample0.jpg"
+    },
+    {
+      "clip_id": "clip07",
+      "time_seconds": 1.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            786,
+            334,
+            914,
+            432
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            406,
+            330,
+            532,
+            417
+          ],
+          "visibility": "visible"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip07_sample1.jpg"
+    },
+    {
+      "clip_id": "clip07",
+      "time_seconds": 2.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            594,
+            259,
+            725,
+            356
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            412,
+            255,
+            540,
+            337
+          ],
+          "visibility": "visible"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip07_sample2.jpg"
+    },
+    {
+      "clip_id": "clip07",
+      "time_seconds": 3.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            636,
+            246,
+            792,
+            348
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            514,
+            234,
+            650,
+            325
+          ],
+          "visibility": "partial"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip07_sample3.jpg"
+    },
+    {
+      "clip_id": "clip08",
+      "time_seconds": 0.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            594,
+            196,
+            890,
+            320
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            430,
+            190,
+            664,
+            300
+          ],
+          "visibility": "partial"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip08_sample0.jpg"
+    },
+    {
+      "clip_id": "clip08",
+      "time_seconds": 1.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            518,
+            244,
+            998,
+            430
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            388,
+            220,
+            724,
+            380
+          ],
+          "visibility": "partial"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip08_sample1.jpg"
+    },
+    {
+      "clip_id": "clip08",
+      "time_seconds": 2.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            320,
+            204,
+            676,
+            467
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            484,
+            164,
+            782,
+            348
+          ],
+          "visibility": "partial"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip08_sample2.jpg"
+    },
+    {
+      "clip_id": "clip08",
+      "time_seconds": 3.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            140,
+            153,
+            760,
+            423
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            288,
+            90,
+            794,
+            322
+          ],
+          "visibility": "partial"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip08_sample3.jpg"
+    },
+    {
+      "clip_id": "clip09",
+      "time_seconds": 0.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            306,
+            172,
+            505,
+            258
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            58,
+            172,
+            170,
+            246
+          ],
+          "visibility": "partial"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip09_sample0.jpg"
+    },
+    {
+      "clip_id": "clip09",
+      "time_seconds": 1.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            516,
+            210,
+            863,
+            328
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            334,
+            208,
+            578,
+            310
+          ],
+          "visibility": "partial"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip09_sample1.jpg"
+    },
+    {
+      "clip_id": "clip09",
+      "time_seconds": 2.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            414,
+            216,
+            952,
+            402
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            412,
+            210,
+            650,
+            358
+          ],
+          "visibility": "partial"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip09_sample2.jpg"
+    },
+    {
+      "clip_id": "clip09",
+      "time_seconds": 3.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            414,
+            196,
+            802,
+            451
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            645,
+            169,
+            904,
+            320
+          ],
+          "visibility": "partial"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip09_sample3.jpg"
+    },
+    {
+      "clip_id": "clip10",
+      "time_seconds": 0.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            494,
+            264,
+            617,
+            315
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            615,
+            254,
+            704,
+            302
+          ],
+          "visibility": "visible"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip10_sample0.jpg"
+    },
+    {
+      "clip_id": "clip10",
+      "time_seconds": 1.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            414,
+            296,
+            642,
+            389
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            595,
+            290,
+            739,
+            355
+          ],
+          "visibility": "partial"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip10_sample1.jpg"
+    },
+    {
+      "clip_id": "clip10",
+      "time_seconds": 2.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            217,
+            373,
+            613,
+            526
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            374,
+            327,
+            613,
+            435
+          ],
+          "visibility": "partial"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip10_sample2.jpg"
+    },
+    {
+      "clip_id": "clip10",
+      "time_seconds": 3.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            486,
+            510,
+            887,
+            720
+          ],
+          "visibility": "partial"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            261,
+            478,
+            599,
+            622
+          ],
+          "visibility": "partial"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip10_sample3.jpg"
+    },
+    {
+      "clip_id": "clip11",
+      "time_seconds": 0.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            916,
+            320,
+            1072,
+            426
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            416,
+            310,
+            560,
+            414
+          ],
+          "visibility": "visible"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip11_sample0.jpg"
+    },
+    {
+      "clip_id": "clip11",
+      "time_seconds": 1.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            790,
+            298,
+            939,
+            391
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            496,
+            286,
+            624,
+            384
+          ],
+          "visibility": "visible"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip11_sample1.jpg"
+    },
+    {
+      "clip_id": "clip11",
+      "time_seconds": 2.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            670,
+            286,
+            814,
+            389
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            514,
+            272,
+            648,
+            366
+          ],
+          "visibility": "visible"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip11_sample2.jpg"
+    },
+    {
+      "clip_id": "clip11",
+      "time_seconds": 3.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            736,
+            236,
+            901,
+            351
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            632,
+            204,
+            770,
+            307
+          ],
+          "visibility": "partial"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip11_sample3.jpg"
+    },
+    {
+      "clip_id": "clip12",
+      "time_seconds": 0.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            566,
+            222,
+            940,
+            366
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            332,
+            198,
+            610,
+            334
+          ],
+          "visibility": "partial"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip12_sample0.jpg"
+    },
+    {
+      "clip_id": "clip12",
+      "time_seconds": 1.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            376,
+            230,
+            810,
+            444
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            366,
+            184,
+            706,
+            354
+          ],
+          "visibility": "partial"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip12_sample1.jpg"
+    },
+    {
+      "clip_id": "clip12",
+      "time_seconds": 2.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            224,
+            204,
+            764,
+            443
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            550,
+            121,
+            882,
+            326
+          ],
+          "visibility": "partial"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip12_sample2.jpg"
+    },
+    {
+      "clip_id": "clip12",
+      "time_seconds": 3.3,
+      "shot_index": 0,
+      "cars": [
+        {
+          "identity": "car_a",
+          "bbox": [
+            402,
+            257,
+            998,
+            484
+          ],
+          "visibility": "visible"
+        },
+        {
+          "identity": "car_b",
+          "bbox": [
+            486,
+            162,
+            893,
+            332
+          ],
+          "visibility": "partial"
+        }
+      ],
+      "split": "test",
+      "lead_identity": "car_a",
+      "chase_identity": "car_b",
+      "frame": "outputs/inspection/clip12_sample3.jpg"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+ultralytics==8.3.203
+torch==2.6.0
+torchvision==0.21.0
+opencv-python==4.11.0.86
+numpy==2.2.6
+pillow==11.3.0
+imageio-ffmpeg==0.6.0
+streamlit==1.64.0
+scipy==1.18.1
+pytest==9.1.1
+pandas==3.0.6
+altair==6.3.0
+lap==0.5.12

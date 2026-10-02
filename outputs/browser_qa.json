@@ -1,0 +1,55 @@
+{
+  "loaded": true,
+  "clipSelectorChanged": true,
+  "videoMetadata": {
+    "readyState": 4,
+    "duration": 4,
+    "width": 1280,
+    "height": 720
+  },
+  "playbackAdvanced": true,
+  "reviewCharts": 2,
+  "downloads": [
+    {
+      "filename": "clip01_observations.csv",
+      "bytes": 9587,
+      "verified": true
+    },
+    {
+      "filename": "clip01_frame_metrics.csv",
+      "bytes": 3602,
+      "verified": true
+    },
+    {
+      "filename": "clip01_summary.json",
+      "bytes": 1215,
+      "verified": true
+    },
+    {
+      "filename": "clip01_annotated.mp4",
+      "bytes": 1513892,
+      "verified": true
+    },
+    {
+      "filename": "evaluation_report.json",
+      "bytes": 15412,
+      "verified": true
+    },
+    {
+      "filename": "RESULTS.md",
+      "bytes": 7526,
+      "verified": true
+    }
+  ],
+  "libraryThumbnails": 12,
+  "processTab": true,
+  "evidenceTab": true,
+  "comparisonReplay": {
+    "duration": 4.3,
+    "width": 1280,
+    "height": 720
+  },
+  "reviewReturn": true,
+  "noExceptions": true,
+  "note": "Verified real saved replay playback, charts, navigation, selection and exports. Numeric accuracy is separately measured against sparse visual reference labels."
+}

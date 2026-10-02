@@ -1,0 +1,19 @@
+# Project instructions
+
+## User requirements
+
+1. DriftLens is a separate Formula Drift computer vision portfolio project using free tools and real footage. Its root is `G:\DriftLens`.
+2. Keep PitWall and the banking project separate. Do not modify or move either project, share their environments, import their application code or connect their data without a new explicit user request.
+3. The user selected tandem tracking and run review and explicitly authorised implementation on 2 October 2026 after supplying `longbeach2024_action.mp4`. The offline CPU pipeline and Streamlit review interface are implemented. Read `SCOPE.md` for the current boundaries rather than treating this as planning only.
+4. Every README authored or edited for this project must contain no dash characters. This applies to prose, Markdown syntax, URLs, commands and code examples. Use paragraphs and numbered lists. Avoid table separators, dash bullets and dash punctuation.
+5. Validate all project README files for ASCII hyphens and Unicode characters in category Pd before delivery. Fix failures and report the check truthfully. This rule is specific to README files; it does not prohibit flags or URLs in implementation files.
+6. Use the independent project environment and free local tools. Do not introduce a paid service or API without explicit user authorisation.
+7. The selected footage is the official Formula DRIFT Long Beach 2024 Top 16 ALL ACTION source recorded in `data/clip_catalog.json`. The local file is `longbeach2024_action.mp4`. Do not substitute the earlier proposed 2025 recording in metadata or results.
+8. Keep source, timestamps and permission information. Reuse permission is unverified. Keep raw footage, thumbnails and video derivatives private unless an applicable permission is established. Do not assume public viewing establishes redistribution rights.
+9. The catalogue has 12 continuous camera shots totalling 53.4 seconds, with six tuning and six test shots. Keep complete battle groups within one split, including alternate runs and related views. Compare trackers using the same source frames and detector settings.
+10. Reference labels contain 24 sparse test frames with 48 approximate visible boxes and four tuning frames with eight boxes. They were drafted by an AI assistant from visual source inspection and have no human expert review. Attribute them accurately and describe resulting scores as diagnostic reference evaluation, not an expert verified or full tracking benchmark.
+11. Distinguish image measurements from physical telemetry. Do not claim physical gap, speed, drift angle, judging proximity, driver skill or official scores from bounding boxes. The separation proxy is image center distance divided by mean detected box width.
+12. Lead and chase assignments require visual review of the participating cars and travel order. Tracker numbers alone do not establish roles or reconnect physical identities through cuts. Preserve the attribution and uncertainty of any initial role suggestions.
+13. Use observed detections for measurements. Mark missing observations explicitly, withhold separation when either selected car is missing, and never present hidden or interpolated positions as observed facts.
+14. Report measured performance, aligned label counts, comparable identity transitions and failures honestly. Sampling fps is not processing throughput. Sparse reference samples do not establish identities throughout unlabelled intervals or full HOTA, IDF1 or MOTA metrics.
+15. Record actual settings and evidence in run summaries, `outputs/evaluation_report.json` and `docs/RESULTS.md`. Preserve unsuccessful clips. Do not invent results or present unverified browser, deployment or expert review claims as completed checks.

@@ -1,0 +1,113 @@
+{
+  "clip01/bytetrack": {
+    "car_a": {
+      "2": 4
+    },
+    "car_b": {
+      "1": 4
+    }
+  },
+  "clip07/bytetrack": {
+    "car_a": {
+      "2": 3,
+      "4": 1
+    },
+    "car_b": {
+      "1": 4
+    }
+  },
+  "clip07/botsort": {
+    "car_a": {
+      "2": 4
+    },
+    "car_b": {
+      "1": 4
+    }
+  },
+  "clip08/bytetrack": {
+    "car_a": {
+      "1": 2,
+      "2": 2
+    },
+    "car_b": {
+      "2": 2,
+      "4": 1
+    }
+  },
+  "clip08/botsort": {
+    "car_a": {
+      "1": 4
+    },
+    "car_b": {
+      "2": 3
+    }
+  },
+  "clip09/bytetrack": {
+    "car_a": {
+      "1": 4
+    },
+    "car_b": {
+      "4": 1,
+      "10": 1
+    }
+  },
+  "clip09/botsort": {
+    "car_a": {
+      "1": 4
+    },
+    "car_b": {
+      "8": 1,
+      "14": 1
+    }
+  },
+  "clip10/bytetrack": {
+    "car_a": {
+      "1": 3
+    },
+    "car_b": {
+      "3": 2
+    }
+  },
+  "clip10/botsort": {
+    "car_a": {
+      "10": 1
+    },
+    "car_b": {}
+  },
+  "clip11/bytetrack": {
+    "car_a": {
+      "2": 2,
+      "7": 2
+    },
+    "car_b": {
+      "1": 4
+    }
+  },
+  "clip11/botsort": {
+    "car_a": {
+      "2": 4
+    },
+    "car_b": {
+      "1": 4
+    }
+  },
+  "clip12/bytetrack": {
+    "car_a": {
+      "1": 2,
+      "2": 2
+    },
+    "car_b": {
+      "2": 1,
+      "6": 1
+    }
+  },
+  "clip12/botsort": {
+    "car_a": {
+      "1": 4
+    },
+    "car_b": {
+      "2": 1,
+      "5": 1
+    }
+  }
+}
