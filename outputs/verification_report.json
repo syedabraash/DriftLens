@@ -4,5 +4,81 @@
   "dash_check": "passed",
   "runs_checked": 18,
   "observations_checked": 1286,
-  "current_detection_association_check": "passed"
+  "current_detection_association_check": "passed",
+  "full_runs": [
+    {
+      "run_id": "full_run01",
+      "status": "passed",
+      "source_frames_covered": 801,
+      "source_duration_seconds": 26.7,
+      "sampled_frames": 268,
+      "child_results_checked": 4,
+      "observations_checked": 352,
+      "manual_camera_cuts": 3,
+      "internal_camera_cuts": 0,
+      "role_assignment_cuts": 19,
+      "paired_frames": 120,
+      "pair_coverage": 0.44776119402985076,
+      "unknown_role_frames": 141,
+      "missing_assigned_observation_frames": 7,
+      "decoded_mp4": {
+        "frames": 268,
+        "fps": 10.0,
+        "duration_seconds": 26.8,
+        "width": 1280,
+        "height": 720
+      },
+      "source_cache_signature_check": "passed",
+      "children": [
+        {
+          "shot_id": "shot01",
+          "frames": 82,
+          "observations": 179,
+          "paired_frames": 58,
+          "role_intervals": 4,
+          "current_detection_association": "passed",
+          "timestamp_and_role_mapping": "passed"
+        },
+        {
+          "shot_id": "shot02",
+          "frames": 49,
+          "observations": 83,
+          "paired_frames": 34,
+          "role_intervals": 4,
+          "current_detection_association": "passed",
+          "timestamp_and_role_mapping": "passed"
+        },
+        {
+          "shot_id": "shot03",
+          "frames": 45,
+          "observations": 27,
+          "paired_frames": 10,
+          "role_intervals": 5,
+          "current_detection_association": "passed",
+          "timestamp_and_role_mapping": "passed"
+        },
+        {
+          "shot_id": "shot04",
+          "frames": 92,
+          "observations": 63,
+          "paired_frames": 18,
+          "role_intervals": 10,
+          "current_detection_association": "passed",
+          "timestamp_and_role_mapping": "passed"
+        }
+      ],
+      "evidence_scope": {
+        "additional_independent_test": false,
+        "overlapping_sparse_test_clips": [
+          "clip07",
+          "clip08"
+        ],
+        "accuracy_evaluation_for_640_agnostic_profile": "not established by the separate 416 pixel sparse diagnostic",
+        "role_reference_method": "Assistant visual review; no human expert validation asserted"
+      }
+    }
+  ],
+  "full_runs_checked": 1,
+  "full_run_child_results_checked": 4,
+  "status": "passed"
 }

@@ -17,5 +17,8 @@ outputs/matplotlib_cache/
 outputs/runs/
 outputs/inspection/
 outputs/screenshots/
+outputs/full_runs/
+outputs/full_run_inspection/
+outputs/logs/
 outputs/*.log
 .streamlit/secrets.toml

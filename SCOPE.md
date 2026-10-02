@@ -6,7 +6,9 @@ DriftLens is an implemented local Formula Drift tandem tracking and run review p
 
 ## Purpose
 
-Convert short real tandem shots into a numbered replay, observed vehicle trajectories, an image separation chart and reproducible diagnostic evidence. The technical question is how consistently a small pretrained detector and tracker preserve the two vehicle identities through smoke and overlap.
+Convert a complete real tandem run into a combined replay, an explicitly segmented observation timeline, an image separation chart and reproducible diagnostic evidence. The technical question is how consistently a small pretrained detector and tracker preserve the two vehicle identities through smoke and overlap.
+
+The default demonstration covers 1904.5 through 1931.2 seconds of the source, with four contiguous camera shots. It includes 26.7 seconds of broadcast coverage from launch and initiation through the visible finish. Independent sampling of the four shots produces a 26.8 second replay with 268 frames. Exact source and replay timestamps remain available separately.
 
 ## Implemented workflow
 
@@ -20,7 +22,7 @@ Convert short real tandem shots into a numbered replay, observed vehicle traject
 8. Compare trackers on the same source interval and detector settings.
 9. Evaluate saved observations against the supplied sparse visual reference labels.
 
-The project uses offline CPU inference with a small model, nominally sampling 10 frames per second at 416 pixel inference size. The analysis sampling rate is different from measured processing throughput. Actual settings and timing belong in each run summary. The first setup needs internet access for free Python packages and model weights; subsequent analysis runs locally.
+The original diagnostic comparison uses offline CPU inference sampling 10 frames per second at 416 pixel inference size. The complete run uses BoTSORT at 640 pixel inference with class agnostic suppression to reduce duplicate boxes on the same car. The analysis sampling rate is different from measured processing throughput. Actual settings and timing belong in each run summary. The first setup needs internet access for free Python packages and model weights; subsequent analysis runs locally.
 
 ## Selected footage and shot library
 
@@ -48,7 +50,9 @@ The separation chart measures a perspective dependent image proxy. It does not m
 
 The application does not produce official Formula Drift scores or identify driver names. Lead and chase are reviewer supplied roles. Initial visual role suggestions are attributed in the manifest and need review. Track IDs do not establish physical identity on their own, especially after smoke or overlap.
 
-Use one continuous camera shot per analysis clip. A conservative cut safeguard resets tracking across detected cuts, but it does not replace visual shot selection or reconnect identities across views.
+Use one continuous camera shot per detector job. The full run manifest joins ordered, contiguous shots into a complete review. Every view has independently reviewed roles and local IDs. Explicit visual role intervals exclude ambiguous observations and allow known fragments to be reviewed without pretending uninterrupted identity. Cuts, unknown gaps and role mapping changes break chart lines. The cut safeguard resets tracking across detected cuts but does not reconnect identities across views.
+
+The complete run reuses material from the existing test broadcast and is a demonstration rather than additional independent evaluation. Saved role intervals apply only to the pinned source, weights and BoTSORT 640 pixel profile. Other tracker or inference settings need fresh role review.
 
 ## Tools and storage
 

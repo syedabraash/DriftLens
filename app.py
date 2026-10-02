@@ -558,7 +558,7 @@ with st.sidebar:
         st.link_button("View footage source", source_info["url"], width="stretch")
     st.divider()
     st.markdown("**Review workflow**")
-    st.markdown("1. Choose a continuous shot\n2. Inspect the numbered replay\n3. Assign lead and chase\n4. Review missing observations\n5. Export measured evidence")
+    st.markdown("1. Watch the complete run\n2. Jump between camera shots\n3. Check lead and chase roles\n4. Review missing observations\n5. Export the replay and timeline")
     st.divider()
     st.markdown('<div class="side-note">Local footage. Free tools.<br>Image measurements only.<br>No official judging scores.</div>', unsafe_allow_html=True)
     st.caption(f"Project folder: {ROOT}")
@@ -566,16 +566,20 @@ with st.sidebar:
         st.rerun()
 
 st.markdown('<div class="eyebrow">COMPUTER VISION / FORMULA DRIFT</div>', unsafe_allow_html=True)
-st.markdown('<div class="hero"><h1>Two cars.<br>One continuous story.</h1><p>Follow the tandem pair through real footage. Inspect every detected box, review the moments smoke hides a car, and measure what the camera actually shows.</p><span class="pill">OBSERVED TRACKS</span><span class="pill">NUMBERED REPLAY</span><span class="pill">EXPORTABLE EVIDENCE</span></div>', unsafe_allow_html=True)
+st.markdown('<div class="hero"><h1>Two cars.<br>The complete run.</h1><p>Review the tandem from launch through the visible finish. Move between camera shots, check the observed cars, and inspect the gaps where measurements are unavailable.</p><span class="pill">COMPLETE REPLAY</span><span class="pill">SHOT BY SHOT REVIEW</span><span class="pill">EXPORTABLE EVIDENCE</span></div>', unsafe_allow_html=True)
 stats = st.columns(3)
-stats[0].metric("Shots in the library", len(catalog.get("clips", [])))
-stats[1].metric("Prepared tracking results", len(runs))
+complete_count = sum(read_json(path).get("status") == "complete" for path in (ROOT / "outputs/full_runs").glob("*/summary.json"))
+stats[0].metric("Complete runs", complete_count)
+stats[1].metric("Shots in the library", len(catalog.get("clips", [])))
 stats[2].metric("Local video sources", len(sources))
 if notice := st.session_state.pop("notice", None):
     st.success(notice)
 with st.expander(f"Browse the shot library · {len(catalog.get('clips', []))} prepared intervals"):
     render_catalog(catalog, runs)
-review_tab, process_tab, evidence_tab = st.tabs(["Run review", "Process a clip", "Evidence"])
+full_tab, review_tab, process_tab, evidence_tab = st.tabs(["Complete run", "Shot review", "Process a clip", "Evidence"])
+with full_tab:
+    from driftlens.full_run_ui import render_full_run
+    render_full_run(ROOT)
 with review_tab:
     selected_run = render_review(runs)
 with process_tab:

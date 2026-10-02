@@ -54,10 +54,10 @@ def _notify(callback, fraction: float, message: str) -> None:
         callback(float(fraction), message)
 
 
-def analyze_video(source: Path, output_dir: Path, start_seconds: float, end_seconds: float, tracker: str = "bytetrack", imgsz: int = 416, target_fps: float = 10, progress_callback=None) -> dict:
+def analyze_video(source: Path, output_dir: Path, start_seconds: float, end_seconds: float, tracker: str = "bytetrack", imgsz: int = 416, target_fps: float = 10, progress_callback=None, agnostic_nms: bool = False) -> dict:
     """Record failures from inference, decoding and final exports consistently."""
     try:
-        return _analyze_video(source, output_dir, start_seconds, end_seconds, tracker, imgsz, target_fps, progress_callback)
+        return _analyze_video(source, output_dir, start_seconds, end_seconds, tracker, imgsz, target_fps, progress_callback, agnostic_nms)
     except Exception as error:
         output_dir = Path(output_dir).resolve()
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -65,7 +65,7 @@ def analyze_video(source: Path, output_dir: Path, start_seconds: float, end_seco
         raise
 
 
-def _analyze_video(source: Path, output_dir: Path, start_seconds: float, end_seconds: float, tracker: str = "bytetrack", imgsz: int = 416, target_fps: float = 10, progress_callback=None) -> dict:
+def _analyze_video(source: Path, output_dir: Path, start_seconds: float, end_seconds: float, tracker: str = "bytetrack", imgsz: int = 416, target_fps: float = 10, progress_callback=None, agnostic_nms: bool = False) -> dict:
     """Process a bounded clip; trackers only emit observations, never hidden cars."""
     import torch
     (ROOT / ".settings").mkdir(parents=True, exist_ok=True)
@@ -136,7 +136,7 @@ def _analyze_video(source: Path, output_dir: Path, start_seconds: float, end_sec
             frame_index = len(frames)
             frame_record = {"frame_index": frame_index, "clip_time": round((source_index - first_index) / info["source_fps"], 6), "source_time": round(source_index / info["source_fps"], 6), "shot_index": shot}
             frames.append(frame_record)
-            result = model.track(frame, persist=True, tracker=f"{tracker}.yaml", classes=[2, 7], conf=0.15, iou=0.5, imgsz=imgsz, device="cpu", verbose=False)[0]
+            result = model.track(frame, persist=True, tracker=f"{tracker}.yaml", classes=[2, 7], conf=0.15, iou=0.5, agnostic_nms=agnostic_nms, imgsz=imgsz, device="cpu", verbose=False)[0]
             boxes = result.boxes
             for raw in raw_detections:
                 detections.append({"clip_id": clip_id, **frame_record, "track_id": "", **raw, "observed": True})
@@ -168,6 +168,7 @@ def _analyze_video(source: Path, output_dir: Path, start_seconds: float, end_sec
     summary["clip_id"] = clip_id
     summary["files"]["detections"] = "detections.csv"
     summary["pipeline_revision"] = 2
+    summary["agnostic_nms"] = bool(agnostic_nms)
     render_run(output_dir, summary, observations, frames)
     summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
     _notify(progress_callback, 1.0, "Replay and observations saved")
@@ -177,6 +178,7 @@ def _analyze_video(source: Path, output_dir: Path, start_seconds: float, end_sec
 def render_run(run_dir: Path, summary: dict, observations: list[dict], frames: list[dict]) -> None:
     """Render saved observations without rerunning the detector."""
     import imageio_ffmpeg
+    from .review import roles_at
     capture = cv2.VideoCapture(str(summary["source_path"]))
     if not capture.isOpened():
         raise ValueError("The original video is needed to render role assignments.")
@@ -209,10 +211,15 @@ def render_run(run_dir: Path, summary: dict, observations: list[dict], frames: l
             if not success:
                 raise RuntimeError("Could not decode an observed frame for replay.")
             frame_index = int(frame_record["frame_index"])
+            lead_id, chase_id = roles_at(summary, float(frame_record["clip_time"]))
+            if "role_intervals" in summary and frame_index > 0:
+                previous = roles_at(summary, float(frames[frame_index - 1]["clip_time"]))
+                if previous != (lead_id, chase_id):
+                    trajectories.clear()
             for row in by_frame[frame_index]:
                 identifier = int(row["track_id"])
-                lead = summary.get("lead_id") is not None and identifier == int(summary["lead_id"])
-                chase = summary.get("chase_id") is not None and identifier == int(summary["chase_id"])
+                lead = lead_id is not None and identifier == int(lead_id)
+                chase = chase_id is not None and identifier == int(chase_id)
                 role = "LEAD" if lead else "CHASE" if chase else "CAR"
                 color = (65, 215, 255) if lead else (230, 175, 40) if chase else (180, 180, 180)
                 x1, y1, x2, y2 = [round(float(row[key])) for key in ("x1", "y1", "x2", "y2")]
@@ -228,12 +235,16 @@ def render_run(run_dir: Path, summary: dict, observations: list[dict], frames: l
                 if len(points) >= 2:
                     cv2.polylines(image, [points], False, color, 2, cv2.LINE_AA)
             cv2.rectangle(image, (0, 0), (width, 30), (20, 22, 28), -1)
-            cv2.putText(image, f"DRIFTLENS  |  {summary['tracker'].upper()}  |  {float(frame_record['clip_time']):.1f}s  |  OBSERVED IMAGE POSITIONS", (12, 21), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (240, 240, 240), 1, cv2.LINE_AA)
-            if summary.get("lead_id") is not None:
+            heading = f"DRIFTLENS  |  {summary['tracker'].upper()}  |  {float(frame_record['clip_time']):.1f}s  |  OBSERVED IMAGE POSITIONS"
+            if summary.get("full_run_id"):
+                elapsed = float(summary.get("full_run_offset_seconds", 0)) + float(frame_record["clip_time"])
+                heading = f"DRIFTLENS  |  {summary['full_run_shot'].upper()}  |  RUN {elapsed:.1f}s  |  {summary['tracker'].upper()}  |  IDs LOCAL TO THIS SHOT"
+            cv2.putText(image, heading, (12, 21), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (240, 240, 240), 1, cv2.LINE_AA)
+            if summary.get("lead_id") is not None or "role_intervals" in summary:
                 seen = {int(row["track_id"]) for row in by_frame[frame_index]}
-                absent = [role for role, identifier in (("LEAD", summary["lead_id"]), ("CHASE", summary["chase_id"])) if identifier not in seen]
+                absent = [role for role, identifier in (("LEAD", lead_id), ("CHASE", chase_id)) if identifier not in seen]
                 if absent:
-                    cv2.putText(image, "MISSING OBSERVATION: " + ", ".join(absent), (14, height - 24), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (75, 150, 255), 2, cv2.LINE_AA)
+                    cv2.putText(image, "MISSING OR UNASSIGNED: " + ", ".join(absent), (14, height - 24), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (75, 150, 255), 2, cv2.LINE_AA)
             process.stdin.write(image.tobytes())
         process.stdin.close()
         error = process.stderr.read().decode("utf-8", errors="replace")

@@ -1,6 +1,6 @@
 # DriftLens
 
-DriftLens is a computer vision portfolio project for reviewing Formula Drift tandem runs in real footage. It detects cars, follows their identities, and lets a reviewer assign lead and chase roles before inspecting an annotated replay.
+DriftLens is a computer vision portfolio project for reviewing Formula Drift tandem runs in real footage. The dashboard opens with one complete run from launch through the visible finish, combining four camera shots into an annotated replay and a measurement timeline.
 
 The project lives separately from PitWall and the banking project. It uses a dedicated Python environment and stores its own inputs and outputs.
 
@@ -10,18 +10,22 @@ The project lives separately from PitWall and the banking project. It uses a ded
 2. Double click `launch.cmd`.
 3. Keep the terminal open while using the app.
 4. Open [the local dashboard](http://127.0.0.1:8510) if the browser does not open automatically.
-5. Select a completed run, inspect the car identities, and assign the lead and chase IDs when both are reliable.
+5. Watch the Complete run tab and use the camera shot selector to jump between views.
+6. Inspect the role review intervals, missing observations and image separation chart.
+7. Export the complete replay, timeline CSV, camera shot metadata or summary.
 
-The downloaded source file is `longbeach2024_action.mp4`. Review short intervals containing one camera shot. Processing uses the CPU and may run slower than playback. The first analysis also requires the detector weights to be available locally.
+The downloaded source is `longbeach2024_action.mp4`. The prepared run covers source time 31:44.5 through 32:11.2, lasting 26.7 seconds. Its replay contains 268 sampled frames at ten frames per second and lasts 26.8 seconds because individual camera shots end between sampled frames. The timeline preserves both source time and replay time. Player jumps use whole seconds and may include less than one second before the selected shot.
+
+The Shot review tab retains the twelve original diagnostic clips. Process a clip accepts another continuous camera shot. Processing uses the CPU and may run slower than playback.
 
 ## What it does
 
-1. Processes short intervals from a local video.
+1. Combines contiguous camera shots into a complete local run review.
 2. Detects cars with a small pretrained YOLO model.
 3. Tracks identities with ByteTrack or BoTSORT.
 4. Records detections and every sampled frame in CSV files.
 5. Exports an annotated video for run review.
-6. Computes a screen separation proxy after manual role assignment.
+6. Computes a screen separation proxy using reviewed role assignments.
 7. Leaves measurements empty when either assigned car is missing.
 8. Compares saved results with independent visual reference boxes for detection precision, recall, visible coverage, and sparse identity checks.
 
@@ -31,17 +35,21 @@ The [Ultralytics tracking documentation](https://docs.ultralytics.com/modes/trac
 
 Screen separation is the distance between bounding box centres divided by their mean width. Camera position, zoom, perspective, and changing box sizes affect the value. It describes the image rather than physical distance.
 
-A missing car creates a gap in the measurement chart. Tracker identity numbers do not establish driver identity. Smoke, overlap, replay edits, and camera cuts can interrupt tracking. Inspect the replay before accepting assigned roles.
+A missing observation or unknown role creates a gap in the chart. Tracker IDs are local to each camera shot. Lead and chase roles were visually reviewed by the AI assistant against source car livery and travel order, without human expert validation. Reviewed time intervals exclude ambiguous overlaps, parked vehicles and identity swaps. Role changes and camera cuts break chart lines. The project does not claim automatic identity association across cameras.
+
+The correction form can replace a shot's interval map with two selected IDs for the whole shot and rebuild the complete exports. Inspect the entire shot before accepting that override.
 
 This version does not estimate metres, vehicle speed, drift angle, judging scores, or driver skill. It has no custom trained drift detector. The pretrained model is a baseline whose failures form part of the portfolio evidence.
 
 ## Evidence and reproducibility
 
-Twelve real camera shots are already processed. Six tuning clips and six test clips come from separate battles within the same broadcast. Six test shots also have BoTSORT comparison results. The default demo has reviewed lead and chase labels, with replay and separation measurements ready to inspect.
+Twelve diagnostic camera shots are processed. Six tuning clips and six test clips come from separate battles within the same broadcast. Six test shots also have BoTSORT comparison exports. The complete run reuses material from that broadcast and is a demonstration, not an additional independent test.
+
+The original comparison uses 416 pixel inference. The complete replay uses BoTSORT with 640 pixel inference and suppression of overlapping duplicate detections across car and truck classes. Original comparison scores do not establish accuracy for this complete replay.
 
 On 24 sparse test frames containing 48 reference car boxes, the raw detector precision and recall were both 85.4 percent. ByteTrack visible reference coverage was 83.3 percent with four sampled identity changes. BoTSORT coverage was 75.0 percent with zero changes across fewer comparable samples. These are small diagnostic results, using approximate boxes drafted visually by the AI assistant without human expert validation. They do not establish general accuracy or continuous identity correctness.
 
-Run outputs include `detections.csv`, `observations.csv`, `frames.csv`, `frame_metrics.csv`, and `summary.json`. Raw detections are recorded separately from confirmed tracker observations. The summary records the source interval and processing settings. Annotated exports support visual inspection alongside the original footage.
+Complete outputs are under `outputs/full_runs/full_run01`, including `annotated.mp4`, `timeline.csv`, `shots.json` and `summary.json`. Each child shot retains raw detections, confirmed observations and sampled frame metadata. `data/full_run_catalog.json` records source boundaries and explicit role review decisions. `outputs/full_run_report.json` is the numerical summary.
 
 [Evaluation notes](docs/EVALUATION.md) explain the annotation format, commands, matching rules, and limitations. Evaluation figures belong to their specific labelled clips and settings. Sparse labels are not a complete tracking benchmark.
 
@@ -59,4 +67,4 @@ Project source uses AGPL3. Ultralytics provides an [open source licensing option
 
 ## Tests
 
-The test command is in the evaluation notes. These checks cover detection matching, identity comparisons, missing observations, camera cuts, and unknown separation when a car is absent.
+The test command is in the evaluation notes. Checks cover detection matching, identity comparisons, missing observations, complete source coverage, camera boundaries, role intervals, replay timestamp mapping and export recovery. Browser verification checks actual video playback, shot navigation, charts and downloaded exports.

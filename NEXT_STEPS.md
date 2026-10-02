@@ -8,10 +8,12 @@ The offline CPU pipeline and local review interface have been implemented in `G:
 
 1. Double click `launch.cmd` in the project folder.
 2. Open `http://127.0.0.1:8510` if the browser does not open automatically.
-3. Choose a prepared shot from the library and inspect its numbered replay.
-4. Check lead and chase assignments against visible travel order.
-5. Review the separation curve together with red missing observation markers.
-6. Export the video, observations, frame metrics or summary from the review page.
+3. Watch the Complete run tab, covering 26.7 seconds from launch through the visible finish across four camera shots.
+4. Jump between shots and inspect the reviewed role intervals against visible car livery.
+5. Review the separation curve together with missing or unassigned observation markers.
+6. Export the complete replay, timeline, shot metadata or summary.
+
+The source span produces a 26.8 second sampled replay with 268 frames. The twelve shorter diagnostic examples remain in Shot review. The complete replay is now the default demonstration. Role intervals are AI visual review decisions without human expert validation. A simple user ID override replaces the selected shot's interval map and rebuilds the full exports.
 
 The launcher uses `G:\DriftLens\.venv` and starts only a local Streamlit server. Keep the source recording in this project folder. The pipeline does not use PitWall or banking project environments.
 

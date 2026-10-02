@@ -1,0 +1,52 @@
+{
+  "project": "G:\\DriftLens",
+  "checked_at": "2026-10-02T15:13:14.220Z",
+  "default_complete_run": true,
+  "prominent_duration_seconds": 26.8,
+  "video": {
+    "duration_seconds": 26.8,
+    "width": 1280,
+    "height": 720
+  },
+  "playback_advanced_seconds": 1.142563,
+  "rendered_charts": 2,
+  "shot_jumps": [
+    {
+      "shot_id": "shot02",
+      "requested_playback_boundary_seconds": 8.2,
+      "expected_native_seek_seconds": 8,
+      "actual_seconds": 8,
+      "pre_roll_seconds": 0.1999999999999993
+    },
+    {
+      "shot_id": "shot04",
+      "requested_playback_boundary_seconds": 17.6,
+      "expected_native_seek_seconds": 17,
+      "actual_seconds": 17,
+      "pre_roll_seconds": 0.6000000000000014
+    }
+  ],
+  "exports": [
+    {
+      "filename": "full_run01_timeline.csv",
+      "bytes": 30595
+    },
+    {
+      "filename": "full_run01_summary.json",
+      "bytes": 13368
+    },
+    {
+      "filename": "full_run01_shots.json",
+      "bytes": 10382
+    },
+    {
+      "filename": "full_run01_annotated.mp4",
+      "bytes": 12013443
+    }
+  ],
+  "timeline_rows": 268,
+  "exported_shots": 4,
+  "invalid_same_id_rejected": true,
+  "no_streamlit_or_javascript_exceptions": true,
+  "no_valid_role_mutation": true
+}

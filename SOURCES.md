@@ -12,6 +12,14 @@ The local recording, thumbnails and video derivatives stay private. Reuse and re
 
 The earlier 2025 broadcast proposal is not part of the implemented dataset.
 
+## Complete run provenance
+
+`data/full_run_catalog.json` selects source seconds 1904.5 through 1931.2, from launch and initiation through the visible finish. Its four camera views cover source frames 57135 through 57935 inclusive, with no omitted interior footage. Broadcast coverage can still hide either car behind smoke, overlap or trees. The source lasts 26.7 seconds; independent shot sampling yields a 26.8 second replay with 268 frames. Exact source and replay offsets are recorded separately.
+
+Livery references and interval role assignments were visually drafted by the AI assistant against source imagery and the actual observed tracker boxes. They have no human expert validation and are separate from the sparse diagnostic box labels. Uncertain swaps, parked candidates and merged boxes remain unassigned. The manifest records source and model hashes, processing context, excluded IDs and reasons for each interval.
+
+The complete demonstration overlaps existing test material, including clip07 and clip08. It does not extend the independent test sample counts or justify applying the original diagnostic scores to the new 640 pixel profile. Source inspection sheets and replay derivatives stay local and ignored by Git.
+
 ## Reference annotations
 
 `data/annotations/labels.json` contains the sparse visual reference set. An AI assistant drafted approximate visible vehicle boxes and identity labels from inspected source frames. There has been no human expert review.

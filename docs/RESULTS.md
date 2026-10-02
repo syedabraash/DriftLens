@@ -1,6 +1,30 @@
 # DriftLens measured results
 
-The finished local project contains twelve processed camera shots from the official Formula DRIFT Long Beach 2024 Top 16 ALL ACTION broadcast. The six test shots also have BoTSORT comparison exports. No detector training was performed. This is an offline review tool for a pretrained baseline.
+The local project opens with a complete tandem run from the official Formula DRIFT Long Beach 2024 Top 16 ALL ACTION broadcast. It also retains twelve diagnostic camera shots and six BoTSORT comparison exports. No detector training was performed. This is an offline review tool for a pretrained baseline.
+
+## Complete run demonstration
+
+The source interval is 1904.5 through 1931.2 seconds, spanning 26.7 seconds and 801 original frames from launch and initiation through the visible finish. Four contiguous camera views produce 268 sampled frames and a 26.8 second combined replay at 10 fps. The timeline retains both exact source elapsed time and encoded playback time. Native player jumps use whole seconds with less than one second of pre-roll.
+
+This qualitative replay uses BoTSORT at 640 pixel inference with class agnostic suppression to reduce duplicate car and truck boxes on the same vehicle. It reuses footage from the existing test broadcast. It is not an additional independent evaluation, and the 416 pixel diagnostic scores below are not accuracy estimates for this profile.
+
+| Camera shot | Sampled frames | Frames with both accepted observations | Pair availability |
+| --- | ---: | ---: | ---: |
+| Launch and initiation |82|58|70.7%|
+| Bridge transition |49|34|69.4%|
+| Outer zone and transition |45|10|22.2%|
+| Aerial hairpin and finish |92|18|19.6%|
+| Complete replay |268|120|44.8%|
+
+Pair availability means that both visually accepted roles had current tracker observations. It does not establish accuracy or physical identity. The source footage covers the complete run even where tracking is absent. Unknown measurements remain gaps instead of being filled from hidden or interpolated positions.
+
+The AI assistant visually reviewed local track IDs against source car livery and travel order. Explicit half open role intervals exclude uncertain or merged boxes. Shot01 loses chase ID 2, and later ID 12 changes from a green or merged box to orange blue chase. In shot02, green lead fragments from ID 1 to ID 4; final merged boxes are excluded. In shot03, ID 14 changes from green lead to orange blue chase before green reacquires ID 17. Shot04 ID 29 also changes cars, while IDs 21, 24 and 32 are parked or off-track candidates. The late aerial pair is green lead ID 48 and orange blue chase ID 47. Tracking disappears again before the visible finish. These are curated AI visual decisions without human expert validation, not automatic identity guarantees.
+
+Charts break at camera cuts, mapping changes and unknown samples. Local IDs are never joined automatically across views. Video overlays clear trajectories when a reviewed role mapping changes. Users can inspect the interval map or override one camera shot's whole shot roles and rebuild the complete exports with rollback on failure.
+
+The four detector jobs processed 268 frames in 109.624 seconds, an aggregate 2.445 fps on the inspected CPU. This includes decoding, inference and tracking, excluding model loading, role review and replay export. It is an offline demonstration with local workload variability.
+
+`data/full_run_catalog.json` records source frame boundaries, livery references, processing context and review intervals. `outputs/full_run_report.json` records the completed numerical summary. Full replay media and visual inspection sheets remain local and ignored by Git.
 
 ## What was measured
 
@@ -64,7 +88,7 @@ The unit suite covers matching, duplicate boxes, frame alignment, sparse identit
 
 ## Reproduce and inspect
 
-Run `launch.cmd` and select the prepared first replay. The Evidence tab contains tracker comparisons, clip metadata, this report and the JSON evaluation. The Process a clip tab accepts another local continuous interval.
+Run `launch.cmd` to open Complete run. Shot review retains the shorter examples. The Evidence tab contains tracker comparisons, clip metadata, this report and the original JSON evaluation. Process a clip accepts another local continuous interval. Full run reproduction commands are in the evaluation notes.
 
 The exact source, weights and label hashes are in `outputs/reproducibility_manifest.json`. Direct dependencies are pinned in `requirements.txt`, with installed versions recorded in `requirements.lock.txt`. The evaluation procedure and catalogue commands are in `docs/EVALUATION.md`.
 

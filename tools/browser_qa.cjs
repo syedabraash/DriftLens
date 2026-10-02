@@ -57,14 +57,14 @@ async function downloadExport(page, label, kind) {
     const page = await context.newPage();
     page.on('pageerror', error => errors.push(error.message));
     await page.goto('http://127.0.0.1:8510', { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.getByRole('tab', { name: 'Run review', exact: true }).waitFor({ timeout: 40000 });
+    await page.getByRole('tab', { name: 'Shot review', exact: true }).waitFor({ timeout: 40000 });
     await noExceptions(page);
     checks.loaded = true;
     await page.screenshot({ path: path.join(screenshots, 'overview.png') });
 
-    const reviewTab = page.getByRole('tab', { name: 'Run review', exact: true });
+    const reviewTab = page.getByRole('tab', { name: 'Shot review', exact: true });
     await reviewTab.click();
-    const reviewPanel = page.getByRole('tabpanel', {name: 'Run review'});
+    const reviewPanel = page.getByRole('tabpanel', {name: 'Shot review'});
     const resultSelect = reviewPanel.getByRole('combobox', {name: 'Tracking result', exact: true});
     await resultSelect.scrollIntoViewIfNeeded();
     const originalSelection = await resultSelect.inputValue();
@@ -140,7 +140,7 @@ async function downloadExport(page, label, kind) {
     checks.downloads.push(await downloadExport(page, 'Download saved evaluation', 'json'));
     checks.downloads.push(await downloadExport(page, 'Read the results report · docs/RESULTS.md', 'text'));
 
-    await page.getByRole('tab', {name:'Run review',exact:true}).click();
+    await page.getByRole('tab', {name:'Shot review',exact:true}).click();
     await reviewPanel.locator('[data-testid="stSelectbox"]').first().getByRole('button',{name:'Open',exact:true}).click();
     await page.getByRole('option').filter({hasText:'clip07 ·'}).click();
     await page.getByRole('tab', {name:'Evidence',exact:true}).click();
@@ -153,7 +153,7 @@ async function downloadExport(page, label, kind) {
     assert(checks.comparisonReplay.width === 1280, 'BoTSORT comparison replay did not decode');
     await comparisonExpander.screenshot({path:path.join(screenshots,'tracker_comparison.png')});
     await noExceptions(page);
-    await page.getByRole('tab', { name: 'Run review', exact: true }).click();
+    await page.getByRole('tab', { name: 'Shot review', exact: true }).click();
     await reviewPanel.locator('[data-testid="stSelectbox"]').first().getByRole('button',{name:'Open',exact:true}).click();
     await page.getByRole('option').first().click();
     await noExceptions(page);

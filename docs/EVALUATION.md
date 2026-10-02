@@ -50,16 +50,16 @@ Predictions flagged `observed=false` are excluded. An observation must have a fi
 2. An unmatched observed prediction is a false positive.
 3. An unmatched visible human box is a false negative.
 4. Precision is true positives divided by all observed predictions.
-5. Recall is true positives divided by all visible human boxes.
+5. Recall is true positives divided by all visible reference boxes.
 6. F1 combines precision and recall through their count formula.
 
 An undefined denominator is reported as `null`, rather than an invented perfect or zero score. Partial cars are included in these counts. Hidden cars are excluded. Counts and the number of aligned samples must accompany rates.
 
 ## Sparse tracking checks
 
-Visible ground truth coverage is the fraction of human boxes that match an observed prediction with a nonempty tracker ID. It measures presence of a tracked observation at labelled times, not uninterrupted tracking between them.
+Visible ground truth coverage is the fraction of reference boxes that match an observed prediction with a nonempty tracker ID. It measures presence of a tracked observation at labelled times, not uninterrupted tracking between them.
 
-An identity switch is counted when the same human car has a different matched tracker ID in successive comparable labelled frames within the same clip and camera shot. The report includes the number of actual comparable identity transitions as well as the switch count. A detection miss, hidden label, missing tracker ID, unaligned sample, or camera cut breaks the comparison chain. IDs on either side of an unknown interval are not asserted to be continuous.
+An identity switch is counted when the same reference car has a different matched tracker ID in successive comparable labelled frames within the same clip and camera shot. The report includes the number of actual comparable identity transitions as well as the switch count. A detection miss, hidden label, missing tracker ID, unaligned sample, or camera cut breaks the comparison chain. IDs on either side of an unknown interval are not asserted to be continuous.
 
 Sparse labels cannot establish full MOT metrics, complete switch counts, or identity quality inside unlabelled intervals. In particular, these reports do not claim HOTA, IDF1, MOTA, or a full per-frame benchmark. Review the annotated replay to find failures between labelled samples.
 
@@ -108,6 +108,26 @@ To run the logic checks:
 ```powershell
 .venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
+
+## Complete run demonstration
+
+`data/full_run_catalog.json` covers source seconds 1904.5 through 1931.2 with four contiguous camera shots and 801 source frames. The independently sampled replay has 268 frames at 10 fps and lasts 26.8 seconds. `run_time` preserves source elapsed time; `playback_time` includes the fractional camera boundary rounding in the exported replay. Native player jumps use whole seconds with less than one second of pre-roll.
+
+Recreate the full run with the independent environment:
+
+```powershell
+.venv\Scripts\python.exe -m driftlens.full_run data\full_run_catalog.json --tracker botsort --size 640
+```
+
+Existing complete child results are cached only when source path, source file size and modification time, model checksum, source range, pipeline revision, tracker, sampled rate, inference size and suppression setting match. Add `--force` for fresh inference. A freshly processed source requires visual confirmation of the saved role intervals because tracker IDs are not intrinsic car identities. Preset review intervals are withheld when the source or model checksum differs from the reviewed manifest. To reassemble already reviewed child results without inference, use `--assemble-only`.
+
+The complete run uses class agnostic suppression to remove overlapping car and truck predictions on the same vehicle. The original diagnostic comparison remains 416 pixels with its original suppression setting. Original scores are not accuracy estimates for this different demonstration profile. Complete run material overlaps the existing test broadcast and is not additional held out evidence.
+
+Role intervals are half open seconds relative to each camera shot. An AI assistant inspected the exported observations against source livery and travel order, marking swaps, parked candidates, merged boxes and ambiguous spans. Unassigned intervals remain unknown even when a detector box exists. Measurements require two accepted current observations. Charts break at camera cuts, local identity mapping changes and missing samples. No automatic association across cameras is claimed, and no human expert validation has occurred.
+
+The role form replaces a selected shot's interval map with a whole shot ID assignment. It stages updated replay and metrics, rebuilds the combined exports and restores all previous files if publication fails. Simple whole shot overrides require checking the entire shot for swaps.
+
+Complete outputs are `annotated.mp4`, `timeline.csv`, `shots.json` and `summary.json` under `outputs/full_runs/full_run01`. Each child shot retains raw detections, observations and source frame indices. `outputs/full_run_report.json` records the numeric summary. Browser checks verify the actual 26.8 second video, jumps, chart rendering and downloaded exports.
 
 ## Broader evaluation
 
