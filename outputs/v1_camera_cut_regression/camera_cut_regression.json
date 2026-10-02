@@ -1,0 +1,262 @@
+{
+  "purpose": "V1 camera-cut regression using the same event, with assistant visual boundaries and no human expert review",
+  "sampled_fps": 10,
+  "adjacent_comparisons": 545,
+  "expected_cuts": 6,
+  "detected_expected_cuts": 6,
+  "unexpected_flags": 0,
+  "missing_expected_cuts": 0,
+  "old_expected_cuts_detected": 1,
+  "unit_tests_passed": 7,
+  "settings": {
+    "method": "brightness_residual_and_motion_continuity_v1",
+    "sample_size": [
+      192,
+      108
+    ],
+    "min_structure_residual": 0.1,
+    "max_motion_inlier_fraction": 0.1,
+    "max_corners": 180,
+    "min_corner_distance": 5,
+    "max_forward_backward_error_pixels": 1.5,
+    "ransac_error_pixels": 2.0,
+    "optical_flow_pyramid_levels": [
+      3,
+      1
+    ]
+  },
+  "clips": {
+    "new_upload": {
+      "source_filename": "thorne_olsen_unseen_source.mp4",
+      "start_seconds": 0,
+      "end_seconds": 28.0,
+      "sample_count": 280,
+      "adjacent_comparisons": 279,
+      "expected_cut_times": [
+        5.7,
+        14.8,
+        23.3
+      ],
+      "detected_cut_times": [
+        5.7,
+        14.8,
+        23.3
+      ],
+      "unexpected_cut_times": [],
+      "missing_expected_cut_times": [],
+      "old_detected_cut_times": [],
+      "boundary_metrics": [
+        {
+          "clip_time": 5.7,
+          "source_time": 5.7,
+          "expected_cut": true,
+          "old_is_cut": false,
+          "old_pixel_difference": 0.18228334543694022,
+          "old_histogram_correlation": 0.590697655938075,
+          "structure_residual": 0.16894706277286306,
+          "brightness_shift": -0.03137254901960784,
+          "motion_inlier_fraction": 0.0,
+          "motion_checked": true,
+          "previous_corners": 166,
+          "consistent_matches": 2,
+          "is_cut": true
+        },
+        {
+          "clip_time": 14.8,
+          "source_time": 14.8,
+          "expected_cut": true,
+          "old_is_cut": false,
+          "old_pixel_difference": 0.13016899661099007,
+          "old_histogram_correlation": 0.8665888897483702,
+          "structure_residual": 0.12300668604233686,
+          "brightness_shift": -0.00784313725490196,
+          "motion_inlier_fraction": 0.023622047244094488,
+          "motion_checked": true,
+          "previous_corners": 127,
+          "consistent_matches": 6,
+          "is_cut": true
+        },
+        {
+          "clip_time": 23.3,
+          "source_time": 23.3,
+          "expected_cut": true,
+          "old_is_cut": false,
+          "old_pixel_difference": 0.13575708061002179,
+          "old_histogram_correlation": 0.6414532873673436,
+          "structure_residual": 0.11789348078709022,
+          "brightness_shift": 0.050980392156862744,
+          "motion_inlier_fraction": 0.05172413793103448,
+          "motion_checked": true,
+          "previous_corners": 174,
+          "consistent_matches": 16,
+          "is_cut": true
+        }
+      ],
+      "largest_structure_change_negatives": [
+        {
+          "clip_time": 4.5,
+          "source_time": 4.5,
+          "expected_cut": false,
+          "old_is_cut": false,
+          "old_pixel_difference": 0.10887043088840474,
+          "old_histogram_correlation": 0.9892207713459441,
+          "structure_residual": 0.0983123031317019,
+          "brightness_shift": 0.0,
+          "motion_inlier_fraction": 0.0,
+          "motion_checked": false,
+          "previous_corners": 0,
+          "consistent_matches": 0,
+          "is_cut": false
+        },
+        {
+          "clip_time": 4.6,
+          "source_time": 4.6,
+          "expected_cut": false,
+          "old_is_cut": false,
+          "old_pixel_difference": 0.10605558581457275,
+          "old_histogram_correlation": 0.9875172104165754,
+          "structure_residual": 0.09318547716327742,
+          "brightness_shift": 0.0,
+          "motion_inlier_fraction": 0.0,
+          "motion_checked": false,
+          "previous_corners": 0,
+          "consistent_matches": 0,
+          "is_cut": false
+        },
+        {
+          "clip_time": 4.4,
+          "source_time": 4.4,
+          "expected_cut": false,
+          "old_is_cut": false,
+          "old_pixel_difference": 0.10535811546840958,
+          "old_histogram_correlation": 0.9917845813376766,
+          "structure_residual": 0.09182779648724725,
+          "brightness_shift": 0.0,
+          "motion_inlier_fraction": 0.0,
+          "motion_checked": false,
+          "previous_corners": 0,
+          "consistent_matches": 0,
+          "is_cut": false
+        }
+      ]
+    },
+    "default_demo": {
+      "source_filename": "longbeach2024_action.mp4",
+      "start_seconds": 1904.5,
+      "end_seconds": 1931.2,
+      "sample_count": 267,
+      "adjacent_comparisons": 266,
+      "expected_cut_times": [
+        8.2,
+        13.1,
+        17.5
+      ],
+      "detected_cut_times": [
+        8.2,
+        13.1,
+        17.5
+      ],
+      "unexpected_cut_times": [],
+      "missing_expected_cut_times": [],
+      "old_detected_cut_times": [
+        8.2
+      ],
+      "boundary_metrics": [
+        {
+          "clip_time": 8.2,
+          "source_time": 1912.7,
+          "expected_cut": true,
+          "old_is_cut": true,
+          "old_pixel_difference": 0.22551742919389978,
+          "old_histogram_correlation": 0.6358653111389185,
+          "structure_residual": 0.20114057952282474,
+          "brightness_shift": -0.09411764705882353,
+          "motion_inlier_fraction": 0.0,
+          "motion_checked": true,
+          "previous_corners": 165,
+          "consistent_matches": 1,
+          "is_cut": true
+        },
+        {
+          "clip_time": 13.1,
+          "source_time": 1917.6,
+          "expected_cut": true,
+          "old_is_cut": false,
+          "old_pixel_difference": 0.19308657104817234,
+          "old_histogram_correlation": 0.8102514330148272,
+          "structure_residual": 0.17957459992053462,
+          "brightness_shift": -0.07058823529411765,
+          "motion_inlier_fraction": 0.0,
+          "motion_checked": true,
+          "previous_corners": 87,
+          "consistent_matches": 0,
+          "is_cut": true
+        },
+        {
+          "clip_time": 17.5,
+          "source_time": 1922.0,
+          "expected_cut": true,
+          "old_is_cut": false,
+          "old_pixel_difference": 0.16722494553376907,
+          "old_histogram_correlation": 0.8325761981063862,
+          "structure_residual": 0.162918898638557,
+          "brightness_shift": 0.00392156862745098,
+          "motion_inlier_fraction": 0.0,
+          "motion_checked": true,
+          "previous_corners": 127,
+          "consistent_matches": 4,
+          "is_cut": true
+        }
+      ],
+      "largest_structure_change_negatives": [
+        {
+          "clip_time": 19.0,
+          "source_time": 1923.5,
+          "expected_cut": false,
+          "old_is_cut": false,
+          "old_pixel_difference": 0.12256717501815541,
+          "old_histogram_correlation": 0.9868599802993634,
+          "structure_residual": 0.11631925246294807,
+          "brightness_shift": 0.00392156862745098,
+          "motion_inlier_fraction": 0.7,
+          "motion_checked": true,
+          "previous_corners": 180,
+          "consistent_matches": 151,
+          "is_cut": false
+        },
+        {
+          "clip_time": 19.1,
+          "source_time": 1923.6,
+          "expected_cut": false,
+          "old_is_cut": false,
+          "old_pixel_difference": 0.12390538005325587,
+          "old_histogram_correlation": 0.9897138111017882,
+          "structure_residual": 0.11628824121811811,
+          "brightness_shift": 0.0,
+          "motion_inlier_fraction": 0.7388888888888889,
+          "motion_checked": true,
+          "previous_corners": 180,
+          "consistent_matches": 153,
+          "is_cut": false
+        },
+        {
+          "clip_time": 19.2,
+          "source_time": 1923.7,
+          "expected_cut": false,
+          "old_is_cut": false,
+          "old_pixel_difference": 0.1237291212781409,
+          "old_histogram_correlation": 0.9946477802992609,
+          "structure_residual": 0.11619273167030485,
+          "brightness_shift": -0.00392156862745098,
+          "motion_inlier_fraction": 0.65,
+          "motion_checked": true,
+          "previous_corners": 180,
+          "consistent_matches": 140,
+          "is_cut": false
+        }
+      ]
+    }
+  },
+  "sampling_note": "The direct 26.7 second default source interval has 267 samples. Its preserved stitched demonstration has 268 samples because each catalog shot is sampled separately. This diagnostic does not change the historical replay or measured pair results.",
+  "limitations": "Same-event source inspection regression only. Boundary expectations are assistant visual decisions without human expert review. New upload was used to tune this safeguard; these counts do not establish independent accuracy on new events, arbitrary videos, low sample rates, flashes, or whip pans."
+}

@@ -1,0 +1,135 @@
+{
+  "source_filename": "thorne_olsen_unseen_source.mp4",
+  "start_seconds": 0,
+  "end_seconds": 28.0,
+  "source_fps": 30.0,
+  "sampled_fps": 10.0,
+  "sample_count": 280,
+  "adjacent_comparisons": 279,
+  "scan_seconds": 13.204,
+  "settings": {
+    "method": "brightness_residual_and_motion_continuity_v1",
+    "sample_size": [
+      192,
+      108
+    ],
+    "min_structure_residual": 0.1,
+    "max_motion_inlier_fraction": 0.1,
+    "max_corners": 180,
+    "min_corner_distance": 5,
+    "max_forward_backward_error_pixels": 1.5,
+    "ransac_error_pixels": 2.0,
+    "optical_flow_pyramid_levels": [
+      3,
+      1
+    ]
+  },
+  "expected_cut_times": [
+    5.7,
+    14.8,
+    23.3
+  ],
+  "detected_cut_times": [
+    5.7,
+    14.8,
+    23.3
+  ],
+  "unexpected_cut_times": [],
+  "missing_expected_cut_times": [],
+  "old_detected_cut_times": [],
+  "boundary_metrics": [
+    {
+      "clip_time": 5.7,
+      "source_time": 5.7,
+      "expected_cut": true,
+      "old_is_cut": false,
+      "old_pixel_difference": 0.18228334543694022,
+      "old_histogram_correlation": 0.590697655938075,
+      "structure_residual": 0.16894706277286306,
+      "brightness_shift": -0.03137254901960784,
+      "motion_inlier_fraction": 0.0,
+      "motion_checked": true,
+      "previous_corners": 166,
+      "consistent_matches": 2,
+      "is_cut": true
+    },
+    {
+      "clip_time": 14.8,
+      "source_time": 14.8,
+      "expected_cut": true,
+      "old_is_cut": false,
+      "old_pixel_difference": 0.13016899661099007,
+      "old_histogram_correlation": 0.8665888897483702,
+      "structure_residual": 0.12300668604233686,
+      "brightness_shift": -0.00784313725490196,
+      "motion_inlier_fraction": 0.023622047244094488,
+      "motion_checked": true,
+      "previous_corners": 127,
+      "consistent_matches": 6,
+      "is_cut": true
+    },
+    {
+      "clip_time": 23.3,
+      "source_time": 23.3,
+      "expected_cut": true,
+      "old_is_cut": false,
+      "old_pixel_difference": 0.13575708061002179,
+      "old_histogram_correlation": 0.6414532873673436,
+      "structure_residual": 0.11789348078709022,
+      "brightness_shift": 0.050980392156862744,
+      "motion_inlier_fraction": 0.05172413793103448,
+      "motion_checked": true,
+      "previous_corners": 174,
+      "consistent_matches": 16,
+      "is_cut": true
+    }
+  ],
+  "largest_structure_change_negatives": [
+    {
+      "clip_time": 4.5,
+      "source_time": 4.5,
+      "expected_cut": false,
+      "old_is_cut": false,
+      "old_pixel_difference": 0.10887043088840474,
+      "old_histogram_correlation": 0.9892207713459441,
+      "structure_residual": 0.0983123031317019,
+      "brightness_shift": 0.0,
+      "motion_inlier_fraction": 0.0,
+      "motion_checked": false,
+      "previous_corners": 0,
+      "consistent_matches": 0,
+      "is_cut": false
+    },
+    {
+      "clip_time": 4.6,
+      "source_time": 4.6,
+      "expected_cut": false,
+      "old_is_cut": false,
+      "old_pixel_difference": 0.10605558581457275,
+      "old_histogram_correlation": 0.9875172104165754,
+      "structure_residual": 0.09318547716327742,
+      "brightness_shift": 0.0,
+      "motion_inlier_fraction": 0.0,
+      "motion_checked": false,
+      "previous_corners": 0,
+      "consistent_matches": 0,
+      "is_cut": false
+    },
+    {
+      "clip_time": 4.4,
+      "source_time": 4.4,
+      "expected_cut": false,
+      "old_is_cut": false,
+      "old_pixel_difference": 0.10535811546840958,
+      "old_histogram_correlation": 0.9917845813376766,
+      "structure_residual": 0.09182779648724725,
+      "brightness_shift": 0.0,
+      "motion_inlier_fraction": 0.0,
+      "motion_checked": false,
+      "previous_corners": 0,
+      "consistent_matches": 0,
+      "is_cut": false
+    }
+  ],
+  "evidence_scope": "Same-event source inspection regression only. Boundary expectations are assistant visual decisions without human expert review. New upload was used to tune this safeguard; these counts do not establish independent accuracy on new events, arbitrary videos, low sample rates, flashes, or whip pans."
+}

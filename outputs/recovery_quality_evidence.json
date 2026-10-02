@@ -1,0 +1,110 @@
+{
+  "project": "DriftLens",
+  "date": "2026-10-03",
+  "method": "Saved candidate and observation CSV replay against matched original source frames. Original observed tracker IDs are held fixed; recovery anchors are rebuilt in sampled frame order. No detector training or model inference was performed. This isolates optional recovery fingerprint acceptance and is not fresh end to end pipeline validation.",
+  "weights": "yolov8n.pt",
+  "weights_sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+  "proposed_gate": {
+    "minimum_secondary_hue_mass": 0.1,
+    "hue_histogram_bins": 24,
+    "dominant_circular_hue_window_bins": 4,
+    "meaning": "At least ten percent of saturated appearance pixels must fall outside the largest four adjacent circular hue bins. Achromatic white or grey pixels remain excluded. This qualifies an optional recovery cue, not vehicle presence."
+  },
+  "clip_results": [
+    {
+      "saved_clip": "unseen",
+      "original_recovered_observations": 3,
+      "retained_recovered_observations": 1,
+      "declined_recovered_observations": 2,
+      "declined_cases": [
+        {
+          "frame": 181,
+          "time": 18.1,
+          "track_id": 33,
+          "class_id": 5,
+          "seed_diversity": 0.0,
+          "candidate_diversity": -0.0,
+          "kept_with_gate": false,
+          "anchor_last_time": 18.0
+        },
+        {
+          "frame": 182,
+          "time": 18.2,
+          "track_id": 33,
+          "class_id": 5,
+          "seed_diversity": 0.0,
+          "candidate_diversity": -0.0,
+          "kept_with_gate": false,
+          "anchor_last_time": 18.1
+        }
+      ],
+      "minimum_retained_anchor_secondary_hue_mass": 0.31017,
+      "minimum_retained_candidate_secondary_hue_mass": 0.19876
+    },
+    {
+      "saved_clip": "full02_1",
+      "original_recovered_observations": 0,
+      "retained_recovered_observations": 0,
+      "declined_recovered_observations": 0,
+      "declined_cases": []
+    },
+    {
+      "saved_clip": "full02_2",
+      "original_recovered_observations": 2,
+      "retained_recovered_observations": 2,
+      "declined_recovered_observations": 0,
+      "declined_cases": [],
+      "minimum_retained_anchor_secondary_hue_mass": 0.25663,
+      "minimum_retained_candidate_secondary_hue_mass": 0.33031
+    },
+    {
+      "saved_clip": "full02_3",
+      "original_recovered_observations": 9,
+      "retained_recovered_observations": 8,
+      "declined_recovered_observations": 1,
+      "declined_cases": [
+        {
+          "frame": 1,
+          "time": 0.1,
+          "track_id": 1,
+          "class_id": 0,
+          "seed_diversity": 0.05598,
+          "candidate_diversity": 0.07497,
+          "kept_with_gate": false,
+          "anchor_last_time": 0.0
+        }
+      ],
+      "minimum_retained_anchor_secondary_hue_mass": 0.43434,
+      "minimum_retained_candidate_secondary_hue_mass": 0.46331
+    },
+    {
+      "saved_clip": "full02_4",
+      "original_recovered_observations": 23,
+      "retained_recovered_observations": 23,
+      "declined_recovered_observations": 0,
+      "declined_cases": [],
+      "minimum_retained_anchor_secondary_hue_mass": 0.46902,
+      "minimum_retained_candidate_secondary_hue_mass": 0.45508
+    }
+  ],
+  "preservation": {
+    "unseen_participant_person_recovery": "ID24 at21.3 seconds retained. Source inspection shows the fluorescent yellow and white participant.",
+    "full_run02": "All33 saved recoveries other than the known excluded shot03 bin are retained, including both bus recoveries in shot02 and all23 recoveries in shot04.",
+    "final_aerial_shot": "Bottle recovery for green lead and phone recovery for orange chase retained. Person recovery for orange chase at0.5 seconds retained.",
+    "declined_false_recovery": "Unseen ID33 red and white curb bus recoveries at18.1 and18.2 seconds have zero secondary hue mass; both declined. Excluded full run shot03 bin person recovery at0.1 seconds has anchor0.05598 and current0.07497; declined."
+  },
+  "native_false_candidates": {
+    "ID33": "Native car observations at17.8,17.9,18.0,18.3 seconds remain.",
+    "ID54": "Eight native car observations at23.9 through24.6 seconds remain.",
+    "ID56": "Five native truck observations at25.6 and26.2 through26.5 seconds remain.",
+    "handling": "Keep native observed boxes visible as unassigned candidates and exclude visually reviewed background IDs from participant measurements."
+  },
+  "limitations": [
+    "Footage-specific diagnostic from two battles at the same event; no independent event accuracy evidence.",
+    "Source interpretation and participant roles were reviewed by an AI assistant without expert validation.",
+    "Real monochrome cars may lose optional recovery, while native vehicle observations remain available.",
+    "Multicolor backgrounds may still satisfy this gate. Manual participant and geometry review remain necessary.",
+    "Gate preservation was checked against saved tracker identities; fresh tracker replay and final camera-cut behavior must be verified separately.",
+    "Raw source, inspection images and video derivatives remain private; numerical evidence can be packaged separately."
+  ]
+}

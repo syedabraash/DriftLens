@@ -1,0 +1,101 @@
+{
+  "checked_at": "2026-10-02T22:43:29.109073+00:00",
+  "status": "passed",
+  "tests": {
+    "passed": 122,
+    "subtests_passed": 80
+  },
+  "fresh_browser_upload": {
+    "checked_at": "2026-10-02T22:42:29.647Z",
+    "run_id": "v1_camera_cut_upload_4s",
+    "source_video": "longbeach2024_action.mp4",
+    "visibility_revision": 3,
+    "detected_camera_cuts_seconds": [
+      1.7
+    ],
+    "source_interval": [
+      3029,
+      3033
+    ],
+    "actual_browser_upload": true,
+    "status": "complete",
+    "sampled_frames": 40,
+    "detected_camera_views": 2,
+    "tracked_ids": [
+      1,
+      2,
+      10001,
+      10002
+    ],
+    "processing_seconds": 77.31,
+    "original_model_preserved": true,
+    "same_event_only": true,
+    "playback": {
+      "time": 1.284753,
+      "duration": 4,
+      "error": null
+    },
+    "browser_errors": []
+  },
+  "fresh_pipeline": {
+    "run_id": "v1_camera_cut_upload_4s",
+    "visibility_revision": 3,
+    "frames_decoded": 40,
+    "detected_camera_cuts_seconds": [
+      1.7
+    ],
+    "shot_local_observed_ids": [
+      [
+        1,
+        2
+      ],
+      [
+        10001,
+        10002
+      ]
+    ],
+    "observations_match_current_detector_boxes": true,
+    "recovery_anchors_scoped_to_camera_view": true,
+    "roles_unknown_until_review": true,
+    "upload_sha256_verified": true,
+    "processing_seconds": 77.31,
+    "recovered_observations_checked": 0,
+    "recovery_reset_note": "The cut reset is covered by implementation and recovery reset tests; zero recovered observations occurred in this short smoke."
+  },
+  "historical_examples_preserved": {
+    "full_run02": {
+      "frames": 268,
+      "reviewed_pair_frames": 191
+    },
+    "thorne_olsen_28s": {
+      "frames": 280,
+      "reviewed_pair_frames": 173
+    }
+  },
+  "project_readme_dash_check": {
+    "files": [
+      "README.md"
+    ],
+    "forbidden_characters": 0
+  },
+  "limits": "Same event regression and one short upload smoke. No independent event accuracy or automatic role claims. Source footage and visual derivatives stay private.",
+  "final_browser_review": {
+    "checked_at": "2026-10-02T22:46:19.421Z",
+    "camera_editor_opened": true,
+    "camera_cut_caption_correct": true,
+    "fresh_report_matches": true,
+    "reviewed_pair_metric": "61.8%",
+    "reviewed_replay_plays": true,
+    "reviewed_report_matches": true,
+    "unknown_link_safe": true,
+    "original_landing_preserved": true,
+    "browser_errors": []
+  },
+  "historical_project_verifier": {
+    "status": "passed",
+    "runs_checked": 18,
+    "full_runs_checked": 2,
+    "readmes_checked": 2,
+    "dash_check": "passed"
+  }
+}

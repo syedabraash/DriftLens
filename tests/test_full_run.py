@@ -358,6 +358,29 @@ class FullRunExportSafetyTests(unittest.TestCase):
                 self.assertEqual((run / name).read_bytes(), contents, name)
             self.assertEqual(list(run.glob(".publish_*")), [])
 
+    def test_changed_visibility_revision_does_not_reuse_historical_role_ids(self):
+        with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parents[1], prefix=".full_run_test_") as temporary:
+            root = Path(temporary)
+            data, manifest_path, run = self.prepare_complete_fixture(root)
+            data["source_sha256"] = hashlib.sha256((root / "source.mp4").read_bytes()).hexdigest()
+            data["model_sha256"] = hashlib.sha256((root / "models/yolov8n.pt").read_bytes()).hexdigest()
+            data["role_review_profile"] = {}
+            for shot in data["shots"]:
+                shot["role_intervals"] = [{"start_clip_seconds": 0, "end_clip_seconds": .1, "lead_id": 1, "chase_id": 2}]
+                saved = run / "shots" / shot["id"] / "summary.json"
+                summary = json.loads(saved.read_text(encoding="utf-8"))
+                summary.update(visibility_revision=3, lead_id=None, chase_id=None, role_assignment_method=None, role_review_status="unassigned")
+                saved.write_text(json.dumps(summary), encoding="utf-8")
+            manifest_path.write_text(json.dumps(data), encoding="utf-8")
+            with patch.object(full_run, "ROOT", root), patch.object(pipeline, "video_info", return_value={"duration_seconds": 20}), patch.object(pipeline, "analyze_video", side_effect=AssertionError("Unexpected fresh inference")), patch.object(pipeline, "render_run"), patch.object(full_run, "apply_reviewed_intervals") as apply_roles, patch.object(full_run, "assemble_full_run", return_value={"status": "complete"}):
+                full_run.process_full_run(manifest_path)
+            apply_roles.assert_not_called()
+            for shot in data["shots"]:
+                saved = json.loads((run / "shots" / shot["id"] / "summary.json").read_text(encoding="utf-8"))
+                self.assertIsNone(saved["lead_id"])
+                self.assertIsNone(saved["chase_id"])
+                self.assertNotIn("role_intervals", saved)
+
     def test_changed_model_digest_forces_new_inference_instead_of_cached_shot(self):
         with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parents[1], prefix=".full_run_test_") as temporary:
             root = Path(temporary)

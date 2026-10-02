@@ -2,11 +2,13 @@
 
 Updated on 3 October 2026.
 
-DriftLens is an implemented local Formula Drift tandem tracking and run review project. Its independent root is `G:\DriftLens`, with its own Python environment. The user authorised implementation after supplying `longbeach2024_action.mp4`. PitWall and the banking project remain separate.
+DriftLens V1 is an implemented local, review assisted tandem tracking and run review project. Its independent root is `G:\DriftLens`, with its own Python environment. The user authorised implementation after supplying `longbeach2024_action.mp4`. PitWall and the banking project remain separate.
 
 ## Purpose
 
 Convert a complete real tandem run into a combined replay, an explicitly segmented observation timeline, an image separation chart and reproducible diagnostic evidence. The technical question is how consistently a small pretrained detector and tracker preserve the two vehicle identities through smoke and overlap.
+
+V1 includes private bounded uploads, observed detection and tracking, replay review, explicit role corrections and CSV, JSON and readable report exports. A reviewer checks participants independently in each view; the tool does not promise automatic roles, physical telemetry or reliable identities on arbitrary footage. Users can test their own videos locally, but personal footage and other events have not yet been independently evaluated. `docs/DEMO_GUIDE.md` explains testing and recording the finished result.
 
 The default demonstration covers 1904.5 through 1931.2 seconds of the source, with four contiguous camera shots. It includes 26.7 seconds of broadcast coverage from launch and initiation through the visible finish. Independent sampling of the four shots produces a 26.8 second replay with 268 frames. Exact source and replay timestamps remain available separately.
 
@@ -53,9 +55,13 @@ The separation chart measures a perspective dependent image proxy. It does not m
 
 The application does not produce official Formula Drift scores or identify driver names. Lead and chase are reviewer supplied roles. Initial visual role suggestions are attributed in the manifest and need review. Track IDs do not establish physical identity on their own, especially after smoke or overlap.
 
-Use one continuous camera shot per detector job. The full run manifest joins ordered, contiguous shots into a complete review. Every view has independently reviewed roles and local IDs. Explicit visual role intervals exclude ambiguous observations and allow known fragments to be reviewed without pretending uninterrupted identity. Cuts, unknown gaps and role mapping changes break chart lines. The cut safeguard resets tracking across detected cuts but does not reconnect identities across views.
+Prefer one continuous camera shot for an initial upload test. The full run manifest joins ordered, contiguous shots into a complete review. Every view has independently reviewed roles and local IDs. Explicit visual role intervals exclude ambiguous observations and allow known fragments to be reviewed without pretending uninterrupted identity. Cuts, unknown gaps and role mapping changes break chart lines. The cut safeguard resets tracking across detected cuts but does not reconnect identities across views. Unassigned candidates can include native background vehicle predictions and false boxes; only accepted observations of the reviewed pair enter tandem measurements.
 
 The complete run reuses material from the existing test broadcast and is a demonstration rather than additional independent evaluation. Saved role intervals apply only to the pinned source, weights and BoTSORT 640 pixel profile. Other tracker or inference settings need fresh role review.
+
+A new 28 second Thorne versus Olsen battle excerpt from source seconds 3025 through 3053 was uploaded outside the original selected windows. Its first reviewed output contained 173 accepted pairs in 280 samples, after assistant visual roles and manual camera annotation. The initial automatic safeguard missed all three reviewed cuts. It is from the same broadcast and has no independent expert labels. Once inspected to guide final camera fixes, this excerpt became a regression case; rechecks measure repair of this known example rather than new held out event accuracy. The original automatic output remains preserved. Background false detections, overlapping boxes and fragmented IDs require review.
+
+The final camera safeguard detects all six visually reviewed boundaries with no additional flags in direct scans of the original complete interval and the new battle excerpt. This is regression evidence on two known examples. It does not establish arbitrary camera cut accuracy. The saved reviewed replays, local IDs and pair totals remain preserved, and reprocessed clips require fresh role review. Optional appearance recovery now applies an additional conservative crop check to reject inspected curb and bin artifacts. This may withhold recovery of monochrome cars. Native detector false candidates and unfamiliar appearance errors remain possible.
 
 ## Tools and storage
 

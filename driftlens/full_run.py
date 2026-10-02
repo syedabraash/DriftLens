@@ -144,7 +144,7 @@ def assemble_full_run(manifest: dict, run_dir: Path) -> dict:
             raise ValueError("Stored camera shot uses a different source video")
         if abs(summary["start_seconds"] - shot["start_seconds"]) > TOLERANCE or abs(summary["end_seconds"] - shot["end_seconds"]) > TOLERANCE:
             raise ValueError("Stored shot range disagrees with the complete run manifest")
-        profile_keys = ("tracker", "model", "model_sha256", "imgsz", "sampled_fps", "agnostic_nms", "confidence_threshold", "pipeline_revision", "source_signature", "inference_profile", "tracker_options", "orientations", "recover_vehicle_classes")
+        profile_keys = ("tracker", "model", "model_sha256", "imgsz", "sampled_fps", "agnostic_nms", "confidence_threshold", "pipeline_revision", "source_signature", "inference_profile", "tracker_options", "orientations", "recover_vehicle_classes", "visibility_revision", "camera_cut_settings", "recovery_settings")
         if summaries and any(summary.get(key) != summaries[0].get(key) for key in profile_keys):
             raise ValueError("Camera shots use inconsistent processing profiles or source signatures")
         summaries.append(summary)
@@ -264,7 +264,7 @@ def process_full_run(manifest_path: Path, tracker: str = "botsort", force: bool 
                 profile_arguments = {key: profile[key] for key in ("model_name", "tracker_options", "confidence_threshold", "orientations", "recover_vehicle_classes") if key in profile}
                 summary = analyze_video(source, destination, shot["start_seconds"], shot["end_seconds"], tracker, imgsz, 10, lambda progress, message: print(f"{progress:.0%} {message}", flush=True), agnostic_nms=True, **profile_arguments)
             summary.update(full_run_id=manifest["id"], full_run_shot=shot["id"], full_run_offset_seconds=playback_offset, source_signature=source_signature, model_sha256=model_digest, inference_profile=profile)
-            if shot.get("role_intervals") and review_source_matches and tracker == "botsort" and imgsz == 640 and summary.get("role_review_status") != "user_assignment_unverified":
+            if shot.get("role_intervals") and review_source_matches and tracker == "botsort" and imgsz == 640 and summary.get("visibility_revision", 2) == 2 and summary.get("role_review_status") != "user_assignment_unverified":
                 summary = apply_reviewed_intervals(destination, summary, shot["role_intervals"])
             elif summary.get("role_review_status") == "assistant_visual_review" and not review_source_matches:
                 from .review import derive_frame_metrics, write_metrics

@@ -195,7 +195,9 @@ def render_clip_role_editor(run_dir: Path, summary: dict, observations) -> None:
         intervals = summary.get("role_intervals")
         if intervals is None:
             intervals = [{"start_clip_seconds": 0.0, "end_clip_seconds": duration,
-                          "lead_id": summary.get("lead_id"), "chase_id": summary.get("chase_id"), "review_basis": ""}] if not cuts else []
+                          "lead_id": summary.get("lead_id"), "chase_id": summary.get("chase_id"), "review_basis": ""}] if not cuts else [
+                              {"start_clip_seconds": start, "end_clip_seconds": end, "lead_id": None, "chase_id": None, "review_basis": ""}
+                              for start, end in zip([0.0] + cuts, cuts + [duration])]
         initial = pd.DataFrame([{"Start within clip (s)": row.get("start_clip_seconds"), "End within clip (s)": row.get("end_clip_seconds"),
                                  "Lead ID": row.get("lead_id"), "Chase ID": row.get("chase_id"), "Review basis": row.get("review_basis", "")}
                                 for row in intervals], columns=["Start within clip (s)", "End within clip (s)", "Lead ID", "Chase ID", "Review basis"])

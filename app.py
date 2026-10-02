@@ -276,7 +276,7 @@ def render_review(runs: list[tuple[Path, dict]]) -> tuple[Path, dict] | None:
     metrics_file = run_file(run_dir, summary, "metrics", "frame_metrics.csv")
     observations = read_csv(observation_file) if observation_file else pd.DataFrame()
     metrics = read_csv(metrics_file) if metrics_file else pd.DataFrame()
-    roles_ready = summary.get("lead_id") is not None and summary.get("chase_id") is not None
+    roles_ready = (summary.get("lead_id") is not None and summary.get("chase_id") is not None) or any(row.get("lead_id") is not None and row.get("chase_id") is not None for row in summary.get("role_intervals", []))
     paired = int(truthy(metrics["pair_observed"]).sum()) if "pair_observed" in metrics else int(number(summary.get("paired_frames")))
     frames = len(metrics) or int(number(summary.get("frame_count")))
     columns = st.columns(4)
@@ -286,7 +286,7 @@ def render_review(runs: list[tuple[Path, dict]]) -> tuple[Path, dict] | None:
     columns[3].metric("Processing speed", f"{number(summary.get('processing_fps')):.2f} fps")
     st.caption(f"{summary.get('tracker', 'Tracker')} · {int(number(summary.get('imgsz')))}px inference · sampled at {number(summary.get('sampled_fps')):g} fps · source {short_time(summary.get('start_seconds'))} to {short_time(summary.get('end_seconds'))}")
     if number(summary.get("shot_count"), 1) > 1:
-        st.warning("This interval contains multiple detected shots. Choose a shorter continuous interval before interpreting tandem measurements.")
+        st.warning("This clip contains multiple camera views. Review lead and chase independently in each view using the bounded role editor. Check the boundaries against the replay.")
     reference_check = read_json(run_dir / "evaluation.json")
     sparse_changes = int(number((reference_check.get("tracking") or {}).get("identity_switches")))
     if sparse_changes:
@@ -304,7 +304,7 @@ def render_review(runs: list[tuple[Path, dict]]) -> tuple[Path, dict] | None:
             st.caption("These roles are your saved visual assignments and have no human expert validation.")
         elif summary.get("role_assignment_method"):
             st.caption("Initial roles were visually reviewed by the AI assistant without human expert validation. Check the participating cars during playback.")
-        st.caption("Detector confidence describes each box prediction. It is not a probability that the car identity is correct. Smoke and overlap can cause lost observations or new IDs.")
+        st.caption("Unassigned candidates can include background vehicles or false detections. Only the reviewed lead and chase are used for pair measurements. Detector confidence is not identity confidence; smoke and overlap can cause missing observations or new IDs.")
         if summary.get("recover_vehicle_classes"):
             st.caption("R marks a current box recovered by matching a recent vehicle's appearance. Its confidence belongs to the original predicted class, recorded in the observations CSV; it is not a car or identity probability.")
     with right:
@@ -397,7 +397,7 @@ def render_process(catalog: dict, sources: list[Path]) -> None:
         run_name = third.text_input("Result name", value=name_default, key=f"name_{preset_id}")
         replace = st.checkbox("Replace an existing result with this name and tracker")
         submitted = st.form_submit_button("Process clip locally", type="primary", width="stretch")
-    st.caption("Start with 5 to 20 seconds and 416px on this computer. Processing is offline using the free model weights installed during setup.")
+    st.caption("Start with 5 to 15 seconds on this computer. The enhanced 640px profile uses several detector passes and can take minutes on the CPU. Keep the app open until processing finishes.")
     if not submitted:
         return
     if end <= start or end - start > 60:
@@ -591,6 +591,12 @@ def render_evidence(catalog: dict, runs: list[tuple[Path, dict]], selected: tupl
 
 catalog = read_json(ROOT / "data" / "clip_catalog.json")
 runs = discover_runs()
+# A result link selects only an existing completed run inside this project.
+requested_run = st.query_params.get("run")
+linked_run = next((str(folder) for folder, _ in runs if folder.name == requested_run), None)
+if linked_run and st.session_state.get("linked_preview_run") != linked_run:
+    st.session_state["pending_selected_run"] = linked_run
+    st.session_state["linked_preview_run"] = linked_run
 sources = discover_sources(catalog)
 source_info = catalog.get("source") or {}
 
@@ -622,7 +628,10 @@ if notice := st.session_state.pop("notice", None):
     st.success(notice)
 with st.expander(f"Browse the shot library · {len(catalog.get('clips', []))} prepared intervals"):
     render_catalog(catalog, runs)
-full_tab, review_tab, process_tab, evidence_tab = st.tabs(["Complete run", "Shot review", "Process a clip", "Evidence"])
+full_tab, review_tab, process_tab, evidence_tab = st.tabs(
+    ["Complete run", "Shot review", "Process a clip", "Evidence"],
+    default="Shot review" if linked_run else "Complete run",
+)
 with full_tab:
     from driftlens.full_run_ui import render_full_run
     render_full_run(ROOT)

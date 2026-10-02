@@ -1,6 +1,6 @@
 # DriftLens
 
-DriftLens is a computer vision portfolio project for reviewing Formula Drift tandem runs in real footage. The dashboard opens with one complete run from launch through the visible finish, combining four camera shots into an annotated replay and a measurement timeline.
+DriftLens V1 is a local computer vision tool for review assisted analysis of tandem drifting footage. Upload a private video, process a short interval, inspect the observed cars and correct lead and chase roles before reading the image separation chart. The dashboard also opens with a prepared complete run from launch through the visible finish across four camera views.
 
 The project lives separately from PitWall and the banking project. It uses a dedicated Python environment and stores its own inputs and outputs.
 
@@ -16,7 +16,22 @@ The project lives separately from PitWall and the banking project. It uses a ded
 
 The downloaded source is `longbeach2024_action.mp4`. The prepared run covers source time 31:44.5 through 32:11.2, lasting 26.7 seconds. Its replay contains 268 sampled frames at ten frames per second and lasts 26.8 seconds because individual camera shots end between sampled frames. The timeline preserves both source time and replay time. Player jumps use whole seconds and may include less than one second before the selected shot.
 
-The Shot review tab retains the twelve original diagnostic clips and your own results. In Process a clip, choose Upload my video to add a private local video of up to 200 MB and analyze an interval of up to 60 seconds. Processing uses the CPU and may run slower than playback. Your result includes a replay, a readable report and numerical exports. Confirm lead and chase roles to enable tandem separation measurements.
+The Shot review tab retains the twelve original diagnostic clips and your own results. Your result includes a replay, a readable report and numerical exports. Confirm lead and chase roles to enable tandem separation measurements.
+
+## Test your own video
+
+1. Open Process a clip and choose Upload my video.
+2. Select an MP4, MOV, MKV, AVI or WebM file of at most 200 MB.
+3. Begin with ten to fifteen seconds of one continuous camera view showing both participants. Set Start seconds and End seconds within the video. Each interval must be longer than zero and no longer than 60 seconds.
+4. Keep the selected analysis profile for the first comparison and enter a new Result name such as `my_first_test`.
+5. Choose Process clip locally and keep the terminal open until processing finishes.
+6. Open the result in Shot review. Check boxes, local tracker IDs, missing observations and the readable report against the visible cars.
+7. Open Correct roles within bounded clip intervals. Assign roles only where livery and travel order support them, with a separate decision for every camera view. Leave uncertain IDs empty.
+8. Save clip intervals and rebuild exports, then inspect the replay, image separation chart and downloadable report.
+
+Uploads stay under `data/uploads` and results under `outputs/runs`. The analysis uses your CPU. A recorded 28 second test took about ten minutes before replay export and review, so process first and record the finished dashboard afterward. The sampling rate describes selected video frames and is different from processing speed.
+
+[Local testing and recording guide](docs/DEMO_GUIDE.md) gives launch instructions, a short demo outline and LinkedIn wording. Use your own recording or footage you have permission to publish for a public demo. The supplied broadcast and its visual derivatives remain private while permission is unverified.
 
 ## What it does
 
@@ -40,6 +55,8 @@ Screen separation is the distance between bounding box centres divided by their 
 
 A missing observation or unknown role creates a gap in the chart. Tracker IDs are local to each camera shot. Lead and chase roles were visually reviewed by the AI assistant against source car livery and travel order, without human expert validation. Reviewed time intervals exclude ambiguous overlaps, parked vehicles and identity swaps. Role changes and camera cuts break chart lines. The project does not claim automatic identity association across cameras.
 
+Unassigned candidates can include background vehicles and false detections. Tandem separation uses only the reviewed participant roles with accepted current observations. A visible candidate label is different from a confirmed participating car.
+
 Uploaded clips use a bounded role editor beside the replay. Assign each interval after checking visible liveries and travel order, and split decisions at camera cuts. Saved corrections rebuild the replay, metrics, readable report and analysis JSON together. Unreviewed time stays unknown. The Complete run editor also supports a whole camera shot correction.
 
 This version does not estimate metres, vehicle speed, drift angle, judging scores, or driver skill. One detector candidate was fine tuned for twelve epochs. Its diagnostic test results regressed, so the original weights were preserved. The Evidence tab shows that experiment separately from the earlier tracker comparison. Upload support does not establish accuracy on every event or personal video.
@@ -55,6 +72,12 @@ On 24 sparse test frames containing 48 reference car boxes, the raw detector pre
 The default enhanced replay is under `outputs/full_runs/full_run02`, including `annotated.mp4`, `timeline.csv`, `shots.json`, `summary.json`, `analysis.json` and `report.txt`. The original replay remains under `outputs/full_runs/full_run01`. Each child shot retains current detections, confirmed observations and sampled frame metadata. `data/full_run_enhanced_catalog.json` records the enhanced settings and source reviewed role decisions. `outputs/visibility_report.json` contains the matched comparison.
 
 On this reused demonstration, reviewed pair availability increased from 44.8 percent to 71.3 percent, or 191 of 268 sampled frames. Both cars now have accepted current observations in all eighteen final samples of the aerial shot, compared with zero previously. Orientation passes, tracker settings and conservative recent appearance recovery produced this gain with the original weights. Experimental recovered boxes display R and preserve their original predicted class and score. No hidden position is reconstructed. Remaining visible misses and merged boxes are excluded from pair measurements. This result is not an independent accuracy benchmark or proof of reliability on other footage.
+
+A separate 28 second Thorne versus Olsen excerpt from the same event was uploaded through the app. The original result provided 173 accepted pairs in 280 samples, or 61.8 percent, after assistant visual role and camera review without human expert validation. Processing took 611.995 seconds. Its automatic camera safeguard missed three cuts, and background false detections and fragmented identities remained. The excerpt was outside the existing selected windows when first tested; once used to guide fixes it became a regression example. Its reviewed pair availability is different from detector accuracy and is not evidence of generalisation to other events or your own video. The original output is preserved.
+
+The final camera safeguard was scanned on both complete source intervals. It found all six visually reviewed boundaries with no other flags in these two known examples. The original safeguard found none of the three cuts in the uploaded battle and one of three in the earlier complete interval. The saved reviewed replays and pair totals remain historical results; these direct camera scans do not replace them or establish general camera accuracy. A conservative recovery check also rejected the inspected curb and bin artifacts among saved recovered candidates while retaining the inspected car recoveries. It may withhold optional recovery of monochrome vehicles. Native detector false candidates still require visual review.
+
+Saved numerical camera checks are under `outputs/v1_camera_cut_regression` and crop screening evidence is `outputs/recovery_quality_evidence.json`. They preserve the tested settings and counts. The final runtime, browser, upload, provenance, documentation and test checks are recorded in `outputs/v1_closeout_verification.json`.
 
 [Evaluation notes](docs/EVALUATION.md) explain the annotation format, commands, matching rules, and limitations. Evaluation figures belong to their specific labelled clips and settings. Sparse labels are not a complete tracking benchmark.
 
@@ -73,3 +96,5 @@ Project source uses AGPL3. Ultralytics provides an [open source licensing option
 ## Tests
 
 The test command is in the evaluation notes. Checks cover detection matching, identity comparisons, missing observations, complete source coverage, camera boundaries, role intervals, replay timestamp mapping and export recovery. Browser verification checks actual video playback, shot navigation, charts and downloaded exports.
+
+The completed V1 passed 122 tests and 80 subtests, plus an actual four second browser upload that detected its camera change and played the complete replay. Both preserved examples and report exports passed verification. Roles still need visual review on your own clip.

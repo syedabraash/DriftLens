@@ -1,5 +1,34 @@
 # DriftLens measured results
 
+## V1 evidence boundaries
+
+DriftLens V1 is a local, review assisted tandem analysis tool. Pair availability counts samples with two accepted current observations under reviewed roles; it does not measure detector accuracy, identity accuracy or physical proximity. Default demo, sparse diagnostics, detector adaptation and the new uploaded battle use different evidence and must remain separate.
+
+## New uploaded battle before final camera fixes
+
+The 28 second Thorne versus Olsen excerpt covers original source seconds 3025 through 3053, or 50:25 through 50:53, from the same official Long Beach 2024 broadcast. At its first test it was outside the selected tuning, validation, test and complete demo windows. The UI accepted the private upload and processed 280 samples at a sampling rate of 10 fps with the enhanced 640 pixel BoTSORT profile and original pretrained weights. Measured processing time was 611.995 seconds, or 0.458 processed frames per second, before model loading, replay export and visual role review. It establishes neither real time throughput nor performance on another event.
+
+The automatic output reported one camera view and missed three visually reviewed cuts at clip times 5.7, 14.8 and 23.3 seconds. The assistant added four postprocessing views and bounded visual roles. Those annotations separated the chart but did not reset the original tracker at missed cuts or repair automatic detection. Current detector boxes and IDs were preserved. After this unverified assistant review, 173 of 280 samples had an accepted pair, or 61.8 percent. Missing and ambiguous observations remained unknown. Background false detections, overlapping boxes, fragmented identities and fence occlusion remain failure examples.
+
+`outputs/unseen_clip_test/review_check.json` and `review_notes.txt` preserve the first review. `outputs/unseen_clip_test/automatic_output_before_review` retains the original output. This is same event descriptive evidence without human expert validation or labelled detector accuracy. Since the failure now informs camera fixes, subsequent rechecks are regression tests on a known example, rather than an untouched holdout.
+
+## Final V1 camera and recovery regression checks
+
+The revised safeguard compares adjacent sampled grayscale views using image change and affine motion support. Direct source scans found all six boundaries already reviewed visually, with no additional flags in these two known intervals. The historical safeguard found none of the three new battle cuts and one of the three original complete interval cuts.
+
+| Direct source scan | Samples | Adjacent comparisons | Detected boundaries in clip seconds | Extra flags |
+| --- | ---: | ---: | --- | ---: |
+| New 28 second battle | 280 | 279 | 5.7, 14.8, 23.3 | 0 |
+| Original 26.7 second complete interval | 267 | 266 | 8.2, 13.1, 17.5 | 0 |
+
+The direct original scan contains 267 samples. The historical complete replay independently sampled four child views and still contains 268 frames with 26.8 seconds of encoded playback. The scan count does not replace that replay count. Source boundaries were assistant visual decisions without human expert validation, and these clips now inform fixes. This is regression evidence, not an independent camera cut benchmark or proof on other events.
+
+The additional appearance gate was screened against saved recovered candidates. In the new battle it retained one inspected yellow car box originally predicted as person and rejected two inspected curb artifacts predicted as bus. In `full_run02` it retained 33 inspected legitimate vehicle recovery seeds, including the final green car recoveries, and rejected one known bin artifact among 34 saved recovered observations. This checks known saved crop examples; it is not fresh full tracking or a new pair availability measurement. The conservative color check can withhold optional recovery of monochrome vehicles. Native car and truck false detections can remain as unassigned candidates. All accepted recoveries still require a current observed box and retain original class, score and provenance.
+
+Historical replay files, IDs, role decisions and pair totals remain preserved. These camera scans and recovery screenings do not silently rewrite them. A new full processing run requires fresh role review because tracker resets can change local IDs.
+
+Camera evidence is saved in `outputs/v1_camera_cut_regression/new_upload.json` and `default_demo.json`, with `new_upload_comparisons.csv` and `default_demo_comparisons.csv` preserving adjacent sample decisions. `outputs/recovery_quality_evidence.json` records the inspected recovery candidates and limitations. `outputs/v1_closeout_verification.json` records the final runtime, fresh upload, browser, provenance, README and test checks. Verification footage and source imagery remain private under `outputs/upload_validation/v1_closeout`.
+
 ## Enhanced demonstration and uploads on 3 October 2026
 
 The default `full_run02` reprocesses the same 26.7 second broadcast interval as the preserved `full_run01`, with the original YOLOv8n weights. Reviewed pair availability rises from 120/268 samples (44.8 percent) to 191/268 (71.3 percent). Per shot accepted pairs are 61/82, 38/49, 24/45 and 68/92. These descriptive results include source reviewed role intervals chosen on this demonstration, not an independent accuracy evaluation.
@@ -142,3 +171,10 @@ Run `launch.cmd` to open Complete run. Shot review retains the shorter examples 
 The exact source, weights and label hashes are in `outputs/reproducibility_manifest.json`. Direct dependencies are pinned in `requirements.txt`, with installed versions recorded in `requirements.lock.txt`. The evaluation procedure and catalogue commands are in `docs/EVALUATION.md`.
 
 Raw footage, inspection images and video derivatives stay local. Reuse and redistribution permission remains unverified. The project source is independently licensed under AGPL3; that license does not grant rights to the footage.
+
+
+## Fresh V1 upload smoke check
+
+The finished visibility revision 3 was exercised through the actual browser upload form with a private four second excerpt from original source seconds 3029 to 3033. The enhanced 640 pixel profile processed 40 samples in 77.31 seconds, detected the camera change at 1.7 seconds, and recorded separate ID sets 1 and 2 before the cut and 10001 and 10002 after it. All 40 replay frames decoded, every tracked observation matched a current detector box, and the stored upload hash matched the file. Roles remained unknown until review, so no pair measurements were invented. The browser played the four second replay without errors. This is a short regression smoke check from the same event, not a new accuracy benchmark.
+
+The full test suite passed 122 tests and 80 subtests. The project verifier also passed all eighteen saved diagnostic results and both preserved complete replays. It checked two project README files, including generated pytest cache documentation, with zero forbidden dash characters. The readable report downloads match saved reports; the reviewed 28 second result shows its 61.8 percent bounded pair metric.

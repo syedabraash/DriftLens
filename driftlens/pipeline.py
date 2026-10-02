@@ -16,6 +16,7 @@ import cv2
 import numpy as np
 
 from .review import derive_frame_metrics, write_metrics
+from .camera_cuts import CameraCutDetector, CAMERA_CUT_SETTINGS
 
 ROOT = Path(__file__).resolve().parents[1]
 OBSERVATION_FIELDS = ["clip_id", "frame_index", "clip_time", "source_time", "shot_index", "track_id", "x1", "y1", "x2", "y2", "confidence", "observed", "class", "source_class_id", "vehicle_anchor_class", "appearance_similarity", "detection_method", "recovery_anchor_track_id"]
@@ -167,8 +168,16 @@ def _appearance(frame: np.ndarray, row) -> np.ndarray | None:
     if np.count_nonzero(mask) < max(40, 0.08 * mask.size):
         return None
     histogram = cv2.calcHist([hsv], [0, 1], mask, [24, 16], [0, 180, 0, 256]).reshape(-1)
-    return histogram / histogram.sum()
-
+    histogram /= histogram.sum()
+    # A single saturated color, such as a red and white curb, is too weak an
+    # identity cue for optional class recovery. Treat adjacent circular hue
+    # bins as one color family so red at the hue boundary is not counted twice.
+    hue_mass = histogram.reshape(24, 16).sum(axis=1)
+    circular_hues = np.concatenate((hue_mass, hue_mass[:3]))
+    dominant_family_mass = max(float(circular_hues[start:start + 4].sum()) for start in range(24))
+    if 1.0 - dominant_family_mass < 0.10:
+        return None
+    return histogram
 
 class VehicleClassRecovery:
     """Conservative current-box recovery seeded only by confirmed vehicles.
@@ -262,17 +271,6 @@ def _write_csv(path: Path, fields: list[str], rows: list[dict]) -> None:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
         writer.writerows(rows)
-
-
-def _camera_cut(previous: np.ndarray | None, current: np.ndarray) -> bool:
-    """Conservative scene cut safeguard, not a camera identity estimator."""
-    if previous is None:
-        return False
-    difference = float(np.mean(cv2.absdiff(previous, current))) / 255
-    first = cv2.calcHist([previous], [0], None, [32], [0, 256])
-    second = cv2.calcHist([current], [0], None, [32], [0, 256])
-    correlation = cv2.compareHist(first, second, cv2.HISTCMP_CORREL)
-    return difference > 0.20 and correlation < 0.65
 
 
 def _notify(callback, fraction: float, message: str) -> None:
@@ -371,7 +369,9 @@ def _analyze_video(source: Path, output_dir: Path, start_seconds: float, end_sec
     capture = cv2.VideoCapture(str(source))
     capture.set(cv2.CAP_PROP_POS_FRAMES, first_index)
     observations, detections, frames, candidates = [], [], [], []
-    previous, shot, track_offset = None, 0, 0
+    cut_detector = CameraCutDetector()
+    cut_boundaries = []
+    shot, track_offset = 0, 0
     started = time.perf_counter()
     try:
         for source_index in range(first_index, last_index):
@@ -380,16 +380,15 @@ def _analyze_video(source: Path, output_dir: Path, start_seconds: float, end_sec
                 raise RuntimeError(f"Source decoding ended early at frame {source_index}; expected {last_index}.")
             if (source_index - first_index) % stride:
                 continue
-            small = cv2.cvtColor(cv2.resize(frame, (96, 54)), cv2.COLOR_BGR2GRAY)
-            if _camera_cut(previous, small):
+            if cut_detector.update(frame):
                 shot += 1
+                cut_boundaries.append(round((source_index - first_index) / info["source_fps"], 6))
                 track_offset = shot * 10000
                 if hasattr(model.predictor, "trackers"):
                     for state in model.predictor.trackers:
                         state.reset()
                 if recovery is not None:
                     recovery.reset()
-            previous = small
             frame_index = len(frames)
             frame_record = {"frame_index": frame_index, "clip_time": round((source_index - first_index) / info["source_fps"], 6), "source_time": round(source_index / info["source_fps"], 6), "shot_index": shot}
             frames.append(frame_record)
@@ -442,6 +441,9 @@ def _analyze_video(source: Path, output_dir: Path, start_seconds: float, end_sec
     summary["clip_id"] = clip_id
     summary["files"]["detections"] = "detections.csv"
     summary["pipeline_revision"] = 2
+    summary["visibility_revision"] = 3
+    summary["camera_cut_settings"] = dict(CAMERA_CUT_SETTINGS)
+    summary["detected_camera_cuts_seconds"] = cut_boundaries
     summary["agnostic_nms"] = bool(agnostic_nms)
     summary["detector_classes"] = [2, 7]
     summary["nms_iou"] = 0.5
@@ -449,7 +451,7 @@ def _analyze_video(source: Path, output_dir: Path, start_seconds: float, end_sec
     summary["detector_passes_per_frame"] = len(orientations)
     summary["recover_vehicle_classes"] = recover_vehicle_classes
     summary["recovered_observations"] = sum(row.get("detection_method") == "temporal_appearance_class_recovery" for row in observations)
-    summary["recovery_settings"] = {"max_age_seconds": VehicleClassRecovery.max_age_seconds, "min_appearance_similarity": VehicleClassRecovery.min_appearance_similarity, "min_seed_confidence": 0.25, "min_box_iou": 0.25, "area_ratio": [0.65, 1.45], "shape_ratio": [0.75, 1.33], "one_to_one_unambiguous": True} if recover_vehicle_classes else None
+    summary["recovery_settings"] = {"max_age_seconds": VehicleClassRecovery.max_age_seconds, "min_appearance_similarity": VehicleClassRecovery.min_appearance_similarity, "min_seed_confidence": 0.25, "min_box_iou": 0.25, "area_ratio": [0.65, 1.45], "shape_ratio": [0.75, 1.33], "one_to_one_unambiguous": True, "min_hue_mass_outside_dominant_family": 0.10, "dominant_hue_family_bins": 4} if recover_vehicle_classes else None
     summary["source_class_names"] = getattr(model, "names", {})
     if recover_vehicle_classes:
         summary["files"]["all_class_candidates"] = "candidates.csv"
@@ -512,7 +514,7 @@ def render_run(run_dir: Path, summary: dict, observations: list[dict], frames: l
                 identifier = int(row["track_id"])
                 lead = lead_id is not None and identifier == int(lead_id)
                 chase = chase_id is not None and identifier == int(chase_id)
-                role = "LEAD" if lead else "CHASE" if chase else "CAR"
+                role = "LEAD" if lead else "CHASE" if chase else "CANDIDATE"
                 color = (65, 215, 255) if lead else (230, 175, 40) if chase else (180, 180, 180)
                 x1, y1, x2, y2 = [round(float(row[key])) for key in ("x1", "y1", "x2", "y2")]
                 cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
