@@ -1,0 +1,41 @@
+{
+  "active_profile": "enhanced",
+  "default_full_run_id": "full_run02",
+  "profiles": {
+    "enhanced": {
+      "label": "Enhanced observed car recovery",
+      "description": "Experimental orientation and recent-appearance recovery. Slower CPU analysis; recovered boxes are marked R and retain original class confidence.",
+      "tracker": "botsort",
+      "imgsz": 640,
+      "agnostic_nms": true,
+      "model_name": "yolov8n.pt",
+      "confidence_threshold": 0.15,
+      "orientations": [
+        0,
+        90,
+        270
+      ],
+      "recover_vehicle_classes": true,
+      "tracker_options": {
+        "gmc_method": "none",
+        "fuse_score": false,
+        "track_high_thresh": 0.15,
+        "new_track_thresh": 0.15,
+        "track_low_thresh": 0.1
+      }
+    },
+    "baseline": {
+      "label": "Original 416 pixel diagnostic",
+      "description": "Original ByteTrack diagnostic profile for comparison, without experimental recovery.",
+      "tracker": "bytetrack",
+      "imgsz": 416,
+      "agnostic_nms": false,
+      "model_name": "yolov8n.pt",
+      "confidence_threshold": 0.15,
+      "orientations": [
+        0
+      ],
+      "recover_vehicle_classes": false
+    }
+  }
+}

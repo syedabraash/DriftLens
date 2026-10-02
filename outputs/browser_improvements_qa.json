@@ -1,0 +1,33 @@
+{
+  "checked_at": "2026-10-02T20:54:28.772Z",
+  "uploaded_test_scope": "Private two second source excerpt; not an independent or personal-footage accuracy benchmark",
+  "readable_conclusions": true,
+  "report_downloads": [
+    {
+      "bytes": 7074,
+      "file": "full_run02_report.txt"
+    },
+    {
+      "bytes": 265261,
+      "file": "full_run02_analysis.json"
+    }
+  ],
+  "precise_event_still": true,
+  "finetuning_evidence_visible": true,
+  "incomplete_human_review_rejected_without_mutation": true,
+  "real_video_upload_accepted": true,
+  "upload_video_playback": true,
+  "upload_analysis": {
+    "result": "qa_upload_1790974493253",
+    "sampled_frames": 20,
+    "tracked_ids": [
+      1,
+      2,
+      8
+    ],
+    "automatic_report": true,
+    "replay": true,
+    "unreviewed_roles_preserved": true
+  },
+  "no_streamlit_or_javascript_exceptions": true
+}

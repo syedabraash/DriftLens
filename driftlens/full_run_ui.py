@@ -10,6 +10,7 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
+from .run_analysis_ui import render_run_analysis, render_review_player
 
 ACCENT = "#d7ff60"
 
@@ -97,8 +98,7 @@ def _role_editor(root: Path, directory: Path, summary: dict, shot_options: dict[
             except (ValueError, TypeError):
                 continue
         if len(ids) < 2:
-            st.info("Fewer than two tracked IDs are available for this shot. Inspect its observations before assigning a tandem pair.")
-            return
+            st.info("Fewer than two tracked IDs are available for this shot. A paired role assignment is unavailable; intervals can still preserve one known role or explicitly unknown time.")
         if shot.get("lead_description") or shot.get("chase_description"):
             lead_reference, chase_reference = st.columns(2)
             lead_reference.caption(f"Lead reference: {shot.get('lead_description') or 'No livery description saved'}")
@@ -108,10 +108,16 @@ def _role_editor(root: Path, directory: Path, summary: dict, shot_options: dict[
         if image and image.is_file():
             st.image(str(image), caption="Visual reference for this camera shot. Inspect livery and travel order in the replay.", width="stretch")
         st.caption("Select the numbered tracks belonging to the lead and chase cars in this shot. Missing observations remain gaps; assigning roles does not reconnect an ID after a loss or across a camera cut.")
-        st.caption("Applying the pair below assigns those two IDs to the entire camera shot and replaces any reviewed interval mapping.")
         options = [None] + sorted(ids)
         current_lead = child_summary.get("lead_id", shot.get("lead_id"))
         current_chase = child_summary.get("chase_id", shot.get("chase_id"))
+        mode = st.radio("Role edit scope", ["Bounded intervals", "Entire camera shot"],
+                        key=f"full_role_scope_{run_id}_{selected}", horizontal=True)
+        if mode == "Bounded intervals":
+            _interval_editor(root, directory, child_summary, selected, run_id, ids,
+                             summary.get("manifest_path", "data/full_run_catalog.json"))
+            return
+        st.caption("Applying the pair below assigns those two IDs to the entire camera shot and replaces any reviewed interval mapping.")
         with st.form(f"full_role_form_{run_id}_{selected}"):
             lead_column, chase_column = st.columns(2)
             lead_id = lead_column.selectbox("Lead track ID", options,
@@ -128,7 +134,7 @@ def _role_editor(root: Path, directory: Path, summary: dict, shot_options: dict[
             if lead_id is None or chase_id is None or lead_id == chase_id:
                 st.error("Choose two different observed track IDs for this camera shot.")
                 return
-            manifest = _path(root, root / "data" / "full_run_catalog.json")
+            manifest = _path(root, summary.get("manifest_path", "data/full_run_catalog.json"))
             if manifest is None or not manifest.is_file():
                 st.error("The full run manifest is missing. Restore it before rebuilding role assignments.")
                 return
@@ -142,6 +148,76 @@ def _role_editor(root: Path, directory: Path, summary: dict, shot_options: dict[
                 st.rerun()
             except Exception as error:
                 st.error(f"Could not update the camera shot roles: {error}")
+
+
+def _interval_editor(root: Path, directory: Path, child_summary: dict,
+                     selected: str, run_id: str, ids: set[int], manifest_value: str) -> None:
+    """Replace a half-open role map after validating every edited interval."""
+    from .review import validate_role_intervals
+
+    duration = _number(child_summary.get("duration_seconds"))
+    if duration <= 0:
+        st.error("This shot has no valid duration for bounded role editing.")
+        return
+    existing = child_summary.get("role_intervals")
+    if existing is None:
+        existing = [{"start_clip_seconds": 0.0, "end_clip_seconds": duration,
+                     "lead_id": child_summary.get("lead_id"), "chase_id": child_summary.get("chase_id"),
+                     "review_basis": "Existing whole shot assignment; visually review the interval before saving."}]
+    records = [{"Start within shot (s)": interval.get("start_clip_seconds"),
+                "End within shot (s)": interval.get("end_clip_seconds"),
+                "Lead ID": interval.get("lead_id"), "Chase ID": interval.get("chase_id"),
+                "Review basis": interval.get("review_basis", "")}
+               for interval in existing]
+    initial = pd.DataFrame(records, columns=["Start within shot (s)", "End within shot (s)", "Lead ID", "Chase ID", "Review basis"])
+    for name in ("Start within shot (s)", "End within shot (s)", "Lead ID", "Chase ID"):
+        initial[name] = pd.to_numeric(initial[name], errors="coerce").astype(float)
+    st.caption(f"Shot duration {duration:.3f}s. Enter ordered, nonoverlapping intervals. Starts are included; ends are excluded. Leave a role ID empty when uncertain. Uncovered time stays unknown. Available IDs: {', '.join(str(value) for value in sorted(ids)) or 'none'}.")
+    with st.form(f"full_interval_form_{run_id}_{selected}"):
+        edited = st.data_editor(initial, hide_index=True, num_rows="dynamic", width="stretch",
+                                key=f"full_interval_table_{run_id}_{selected}",
+                                column_config={
+                                    "Start within shot (s)": st.column_config.NumberColumn(min_value=0.0, max_value=duration, step=.01, format="%.3f", required=True),
+                                    "End within shot (s)": st.column_config.NumberColumn(min_value=0.0, max_value=duration, step=.01, format="%.3f", required=True),
+                                    "Lead ID": st.column_config.NumberColumn(min_value=0, step=1, format="%d"),
+                                    "Chase ID": st.column_config.NumberColumn(min_value=0, step=1, format="%d"),
+                                    "Review basis": st.column_config.TextColumn(help="Record the visible livery and travel-order evidence, or why a role remains unknown."),
+                                })
+        clear = st.checkbox("Mark the entire camera shot as role unknown", key=f"full_interval_clear_{run_id}_{selected}")
+        submitted = st.form_submit_button("Save reviewed intervals and rebuild run", type="primary", width="stretch")
+    st.caption("Saving records an unverified user assignment and rebuilds the shot replay, frame metrics and complete exports together. If rebuilding fails, the saved outputs are restored.")
+    if not submitted:
+        return
+    manifest = _path(root, manifest_value)
+    if manifest is None or not manifest.is_file():
+        st.error("The full run manifest is missing. Restore it before rebuilding role assignments.")
+        return
+    try:
+        intervals = []
+        if not clear:
+            for row in edited.to_dict("records"):
+                role_values = []
+                for name in ("Lead ID", "Chase ID"):
+                    value = row.get(name)
+                    if value is None or pd.isna(value):
+                        role_values.append(None)
+                    else:
+                        number = float(value)
+                        if not math.isfinite(number) or not number.is_integer() or int(number) not in ids:
+                            raise ValueError("Each role must be empty or one of the observed integer track IDs.")
+                        role_values.append(int(number))
+                intervals.append({"start_clip_seconds": float(row["Start within shot (s)"]),
+                                  "end_clip_seconds": float(row["End within shot (s)"]),
+                                  "lead_id": role_values[0], "chase_id": role_values[1],
+                                  "review_basis": str(row.get("Review basis") or "User reviewed interval; no expert validation.")})
+        validate_role_intervals(intervals, duration, ids)
+        from .full_run import update_shot_roles
+        with st.spinner("Saving bounded roles and rebuilding every complete run export…"):
+            update_shot_roles(manifest_path=manifest, run_dir=directory, shot_id=selected, role_intervals=intervals)
+        st.session_state["full_run_notice"] = "Reviewed role intervals saved as an unverified user assignment. The complete exports and run conclusions were rebuilt."
+        st.rerun()
+    except Exception as error:
+        st.error(f"Could not save the reviewed role intervals: {error}")
 
 
 def _charts(metrics: pd.DataFrame, shots: list[dict], duration: float) -> None:
@@ -199,19 +275,25 @@ def _charts(metrics: pd.DataFrame, shots: list[dict], duration: float) -> None:
     interval = data["run_time"].diff().loc[lambda values: values > 0].median()
     step = _number(interval, .1)
     data["end_time"] = data["run_time"] + step
-    availability = data[["run_time", "end_time", "shot_id", "lead_observed", "chase_observed"]].melt(
-        ["run_time", "end_time", "shot_id"], var_name="role", value_name="observed")
-    availability["role"] = availability["role"].map({"lead_observed": "Lead", "chase_observed": "Chase"})
-    availability["status"] = availability["observed"].map({True: "Observed", False: "Missing or role unassigned"})
+    status_frames = []
+    for role in ("lead", "chase"):
+        assigned = pd.to_numeric(data[f"{role}_track_id"], errors="coerce").notna() if f"{role}_track_id" in data else pd.Series(False, index=data.index)
+        frames = data[["run_time", "end_time", "shot_id"]].copy()
+        frames["role"] = role.title()
+        frames["status"] = "Role unknown"
+        frames.loc[assigned, "status"] = "Assigned ID not observed"
+        frames.loc[assigned & data[f"{role}_observed"], "status"] = "Observed"
+        status_frames.append(frames)
+    availability = pd.concat(status_frames, ignore_index=True)
     bars = alt.Chart(availability).mark_rect().encode(
         x=alt.X("run_time:Q", title=axis_title, scale=domain), x2="end_time:Q",
         y=alt.Y("role:N", title=None, sort=["Lead", "Chase"]),
-        color=alt.Color("status:N", title=None, scale=alt.Scale(domain=["Observed", "Missing or role unassigned"], range=[ACCENT, "#ff705f"])),
+        color=alt.Color("status:N", title=None, scale=alt.Scale(domain=["Observed", "Assigned ID not observed", "Role unknown"], range=[ACCENT, "#ff705f", "#788898"])),
         tooltip=[alt.Tooltip("run_time:Q", title=tooltip_title, format=".2f"), "shot_id:N", "role:N", "status:N"],
     )
     chart = alt.layer(bars, cuts).properties(height=90).configure_axis(gridColor="#253139", labelColor="#adbcc7", titleColor="#adbcc7").configure_view(stroke=None)
     st.altair_chart(chart, width="stretch")
-    st.caption("The chart breaks at missing observations and camera cuts. Hidden positions are not filled in; role unassigned intervals do not yield pair measurements.")
+    st.caption("The chart distinguishes unknown roles from assigned IDs absent in current observations. Hidden positions are not filled in; line segments stop at gaps, role changes and camera cuts.")
 
 
 def render_full_run(root: Path) -> None:
@@ -237,7 +319,9 @@ def render_full_run(root: Path) -> None:
         return
     options = {str(directory): (directory, summary) for directory, summary in available}
     if st.session_state.get("full_run_selected") not in options:
-        st.session_state["full_run_selected"] = next(iter(options))
+        preferred = _json(root, root / "data" / "inference_profiles.json").get("default_full_run_id")
+        st.session_state["full_run_selected"] = next((key for key, (_, saved) in options.items()
+                                                      if saved.get("run_id") == preferred), next(iter(options)))
     selected = st.selectbox("Complete run", list(options), key="full_run_selected",
                             format_func=lambda key: f"{options[key][1].get('title', options[key][1]['run_id'])} · {_clock(options[key][1].get('duration_seconds'))}")
     directory, summary = options[selected]
@@ -271,15 +355,17 @@ def render_full_run(root: Path) -> None:
     else:
         st.caption(f"Recorded role review status: {status.replace('_', ' ')}")
     st.caption("Track IDs reset for each camera shot. Lead and chase assignments are reviewed separately for each shot; this replay does not establish continuous identity association between camera views.")
+    if (summary.get("inference_profile") or {}).get("recover_vehicle_classes"):
+        st.caption("R marks a current detector box recovered through a recent vehicle appearance match. Original predicted classes and recovery evidence remain in each shot's observations CSV. The displayed confidence belongs to the original class, not a vehicle identity probability.")
     shot_options = {str(shot.get("shot_id", index)): shot for index, shot in enumerate(shots)}
     jump_key = f"full_run_jump_{summary['run_id']}"
     jump = st.selectbox("Jump to camera shot", [None] + list(shot_options), key=jump_key,
                         format_func=lambda value: "Play the complete run from the beginning" if value is None else f"{shot_options[value].get('label', value)} · {_clock(shot_options[value].get('run_start_seconds'))}")
     start_time = _number(shot_options[jump].get("run_start_seconds")) if jump is not None else 0
-    st.caption("Player jumps use whole seconds and may include less than one second before the selected camera shot.")
+    event = render_run_analysis(root, directory, summary, metrics, shots=shots)
     video = _file(root, directory, summary, "video", "annotated.mp4")
     if video:
-        st.video(str(video), start_time=start_time)
+        render_review_player(root, video, start_seconds=start_time, event=event)
     else:
         st.warning("The combined annotated video is missing from this saved run.")
     _role_editor(root, directory, summary, shot_options, jump)

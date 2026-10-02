@@ -122,7 +122,7 @@ def discover_runs() -> list[tuple[Path, dict]]:
 
 def discover_sources(catalog: dict) -> list[Path]:
     candidates = list(ROOT.glob("*"))
-    for raw_dir in (ROOT / "data" / "raw", ROOT / "data" / "videos"):
+    for raw_dir in (ROOT / "data" / "raw", ROOT / "data" / "videos", ROOT / "data" / "uploads"):
         if raw_dir.exists():
             candidates.extend(raw_dir.rglob("*"))
     catalog_source = project_path((catalog.get("source") or {}).get("path", "longbeach2024_action.mp4"))
@@ -253,37 +253,8 @@ def render_charts(metrics: pd.DataFrame) -> None:
 
 
 def render_roles(run_dir: Path, summary: dict, observations: pd.DataFrame) -> None:
-    ids = track_ids(summary, observations)
-    if len(ids) < 2:
-        st.warning("Fewer than two tracked IDs are available. Inspect the replay or try another continuous shot.")
-        return
-    counts = observations.groupby("track_id").size().to_dict() if "track_id" in observations else {}
-    labels = {track_id: f"ID {track_id} · {int(counts.get(track_id, 0))} observations" for track_id in ids}
-    options = [None] + ids
-    lead_id = summary.get("lead_id")
-    chase_id = summary.get("chase_id")
-    with st.expander("Assign lead and chase", expanded=lead_id is None or chase_id is None):
-        st.caption("Watch the numbered replay first, then assign the two participating cars. Roles do not reconnect IDs after a loss or camera cut.")
-        with st.form(f"roles_{run_dir}"):
-            lead_column, chase_column = st.columns(2)
-            lead = lead_column.selectbox("Lead car", options, index=options.index(lead_id) if lead_id in options else 0,
-                                         format_func=lambda value: "Choose an ID" if value is None else labels[value])
-            chase = chase_column.selectbox("Chase car", options, index=options.index(chase_id) if chase_id in options else 0,
-                                           format_func=lambda value: "Choose an ID" if value is None else labels[value])
-            submitted = st.form_submit_button("Apply roles and refresh replay", type="primary")
-        if submitted:
-            if lead is None or chase is None or lead == chase:
-                st.error("Choose two different tracked IDs.")
-            else:
-                try:
-                    from driftlens.review import assign_roles
-
-                    with st.spinner("Updating role labels and pair measurements…"):
-                        assign_roles(run_dir, int(lead), int(chase))
-                    st.session_state["notice"] = "Lead and chase roles saved. The replay and pair measurements were regenerated."
-                    st.rerun()
-                except Exception as error:
-                    st.error(f"Could not assign roles: {error}")
+    from driftlens.clip_role_review import render_clip_role_editor
+    render_clip_role_editor(run_dir, summary, observations)
 
 
 def render_review(runs: list[tuple[Path, dict]]) -> tuple[Path, dict] | None:
@@ -292,6 +263,9 @@ def render_review(runs: list[tuple[Path, dict]]) -> tuple[Path, dict] | None:
         st.info("Open Process a clip, choose a continuous shot, and run the tracker. The numbered replay will appear here.")
         return None
     run_map = {str(path): (path, summary) for path, summary in runs}
+    pending = st.session_state.pop("pending_selected_run", None)
+    if pending in run_map:
+        st.session_state["selected_run"] = pending
     options = list(run_map)
     if st.session_state.get("selected_run") not in run_map:
         st.session_state["selected_run"] = options[0]
@@ -326,21 +300,27 @@ def render_review(runs: list[tuple[Path, dict]]) -> tuple[Path, dict] | None:
         else:
             st.warning("The annotated video is missing from this result.")
         render_roles(run_dir, summary, observations)
-        if summary.get("role_assignment_method"):
+        if summary.get("role_review_status") == "user_assignment_unverified":
+            st.caption("These roles are your saved visual assignments and have no human expert validation.")
+        elif summary.get("role_assignment_method"):
             st.caption("Initial roles were visually reviewed by the AI assistant without human expert validation. Check the participating cars during playback.")
         st.caption("Detector confidence describes each box prediction. It is not a probability that the car identity is correct. Smoke and overlap can cause lost observations or new IDs.")
+        if summary.get("recover_vehicle_classes"):
+            st.caption("R marks a current box recovered by matching a recent vehicle's appearance. Its confidence belongs to the original predicted class, recorded in the observations CSV; it is not a car or identity probability.")
     with right:
         if roles_ready:
             render_charts(metrics)
         else:
             st.subheader("Identify the tandem pair")
-            st.info("Cars begin with numbered IDs. Assign lead and chase beside the replay to generate the pair chart.")
+            st.info("Cars begin with numbered IDs. Review the replay, then use the bounded role editor beside it to generate pair measurements.")
         with st.expander("Tracked IDs and confidence"):
             if {"track_id", "confidence"}.issubset(observations.columns) and not observations.empty:
                 table = observations.groupby("track_id").agg(observations=("confidence", "size"), mean_confidence=("confidence", "mean")).reset_index()
                 st.dataframe(table, hide_index=True, width="stretch", column_config={"mean_confidence": st.column_config.NumberColumn("Mean detector confidence", format="%.3f")})
             else:
                 st.caption("No tracked observations saved for this clip.")
+    from driftlens.run_analysis_ui import render_shot_analysis
+    render_shot_analysis(run_dir, summary)
     st.subheader("Take the evidence with you")
     render_downloads(run_dir, summary)
     with st.expander("Inspect raw observations"):
@@ -349,12 +329,37 @@ def render_review(runs: list[tuple[Path, dict]]) -> tuple[Path, dict] | None:
 
 
 def render_process(catalog: dict, sources: list[Path]) -> None:
-    st.subheader("Process a continuous shot")
-    st.caption("Choose a short interval with both cars visible near its beginning. Keep camera cuts outside the interval.")
-    if not sources:
-        st.warning("No source video found. Place an MP4 inside the DriftLens folder, then refresh this page.")
-        return
-    source = st.selectbox("Local source video", sources, format_func=lambda value: str(value.relative_to(ROOT)))
+    st.subheader("Analyze your own clip")
+    st.caption("Upload a video or choose a saved source. Analysis runs locally and returns a replay, vehicle observations, a written review and downloadable results.")
+    intake = st.radio("Video source", ["Choose a saved video", "Upload my video"], horizontal=True)
+    upload_record = None
+    if intake == "Upload my video":
+        upload = st.file_uploader("Upload a driving video", type=["mp4", "mov", "mkv", "avi", "webm"])
+        st.caption("Up to 200 MB per upload. Analyze up to 60 seconds at a time. Uploaded footage stays in this project's private local folder.")
+        if upload is None:
+            return
+        upload_key = str(getattr(upload, "file_id", "")) or f"{upload.name}:{upload.size}"
+        cached = st.session_state.get("uploaded_video_record")
+        try:
+            if not cached or cached.get("upload_key") != upload_key or not Path(cached["path"]).is_file():
+                from driftlens.uploads import save_video_upload
+                upload_record = save_video_upload(upload, ROOT)
+                upload_record["upload_key"] = upload_key
+                st.session_state["uploaded_video_record"] = upload_record
+            else:
+                upload_record = cached
+            source = project_path(upload_record["path"])
+            if source is None:
+                raise ValueError("Uploaded video path is outside this project.")
+            st.success(f"Ready: {upload_record['original_filename']}")
+        except (OSError, ValueError) as error:
+            st.error(f"Could not use this upload: {error}")
+            return
+    else:
+        if not sources:
+            st.info("Choose Upload my video to add your first source.")
+            return
+        source = st.selectbox("Local source video", sources, format_func=lambda value: str(value.relative_to(ROOT)))
     metadata = video_metadata(str(source), source.stat().st_mtime_ns)
     duration = number(metadata.get("duration"))
     if duration <= 0:
@@ -370,15 +375,25 @@ def render_process(catalog: dict, sources: list[Path]) -> None:
     preset = choices.get(preset_id, {})
     start_default = max(0.0, min(duration - 0.1, number(preset.get("start_seconds"))))
     end_default = min(duration, max(start_default + 0.1, number(preset.get("end_seconds"), start_default + 10)))
+    profile_catalog = read_json(ROOT / "data/inference_profiles.json")
+    profiles = profile_catalog.get("profiles") or {"baseline": {"label": "Original detector and tracker", "model_name": "yolov8n.pt", "tracker": "bytetrack", "imgsz": 416}}
+    profile_ids = list(profiles)
+    active_profile = profile_catalog.get("active_profile", profile_ids[0])
+    profile_id = st.selectbox("Analysis profile", profile_ids, index=profile_ids.index(active_profile) if active_profile in profile_ids else 0,
+                              format_func=lambda value: profiles[value].get("label", value))
+    profile = profiles[profile_id]
+    st.caption(profile.get("description", "Original local detector. Lead and chase roles require review."))
     with st.form("process_clip"):
         first, second, third = st.columns(3)
         start = first.number_input("Start seconds", min_value=0.0, max_value=duration, value=start_default, step=0.1, key=f"start_{source.name}_{preset_id}")
         end = second.number_input("End seconds", min_value=0.0, max_value=duration, value=end_default, step=0.1, key=f"end_{source.name}_{preset_id}")
-        tracker = third.selectbox("Tracker", ["bytetrack", "botsort"], format_func=lambda value: {"bytetrack": "ByteTrack baseline", "botsort": "BoT SORT comparison"}[value])
+        tracker = third.selectbox("Tracker", ["bytetrack", "botsort"], index=1 if profile.get("tracker") == "botsort" else 0,
+                                 format_func=lambda value: {"bytetrack": "ByteTrack", "botsort": "BoT SORT"}[value])
         first, second, third = st.columns(3)
-        imgsz = first.selectbox("Inference image size", [320, 416, 640], index=1)
+        image_sizes = [320, 416, 640, 960, 1280]
+        imgsz = first.selectbox("Inference image size", image_sizes, index=image_sizes.index(profile.get("imgsz", 640)))
         target_fps = second.selectbox("Sample frames per second", [5, 10, 15], index=1)
-        name_default = str(preset.get("id", "custom_shot"))
+        name_default = str(preset.get("id", f"upload_{source.stem[:10]}" if upload_record else "custom_shot"))
         run_name = third.text_input("Result name", value=name_default, key=f"name_{preset_id}")
         replace = st.checkbox("Replace an existing result with this name and tracker")
         submitted = st.form_submit_button("Process clip locally", type="primary", width="stretch")
@@ -419,11 +434,21 @@ def render_process(catalog: dict, sources: list[Path]) -> None:
         from driftlens.pipeline import analyze_video
 
         result = analyze_video(source=source, output_dir=output_dir, start_seconds=float(start), end_seconds=float(end),
-                               tracker=tracker, imgsz=int(imgsz), target_fps=float(target_fps), progress_callback=update_progress)
+                               tracker=tracker, imgsz=int(imgsz), target_fps=float(target_fps), progress_callback=update_progress,
+                               agnostic_nms=profile.get("agnostic_nms", True), model_name=profile.get("model_name", "yolov8n.pt"),
+                               tracker_options=profile.get("tracker_options") if tracker == profile.get("tracker") else None,
+                               confidence_threshold=profile.get("confidence_threshold", .15),
+                               orientations=profile.get("orientations"), recover_vehicle_classes=profile.get("recover_vehicle_classes", False))
+        result["analysis_profile_id"] = profile_id
         progress.progress(1.0, text="Tracking result saved")
         parent_run = output_dir.parent.parent if output_dir.parent.name == "comparisons" else output_dir
-        st.session_state["selected_run"] = str(parent_run)
-        st.session_state["notice"] = f"Processed {number(result.get('frame_count')):g} sampled frames. Open Run review to inspect the replay and assign lead and chase."
+        st.session_state["pending_selected_run"] = str(parent_run)
+        if upload_record:
+            result["uploaded_source"] = {key: value for key, value in upload_record.items() if key != "upload_key"}
+            (output_dir / "summary.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+        from driftlens.run_analysis_ui import save_shot_analysis
+        save_shot_analysis(output_dir, result)
+        st.session_state["notice"] = f"Analyzed {number(result.get('frame_count')):g} sampled frames. Your replay and written analysis are in Shot review. Confirm lead and chase there to enable tandem separation measurements."
         st.rerun()
     except Exception as error:
         progress.empty()
@@ -457,6 +482,27 @@ def comparison_rows(run_dir: Path, summary: dict) -> list[dict]:
 def render_evidence(catalog: dict, runs: list[tuple[Path, dict]], selected: tuple[Path, dict] | None) -> None:
     st.subheader("Measured evidence, visible limitations")
     st.caption("Pair availability measures whether both selected IDs produced observations. It does not establish detection accuracy or correct identity.")
+    experiment = read_json(ROOT / "outputs" / "finetuning_report.json")
+    if experiment:
+        st.markdown("**Fine tuning experiment**")
+        st.write("The detector was fine tuned for 12 epochs on separate battle groups. The candidate improved validation precision but regressed on the unchanged diagnostic test references, so the original weights remain active.")
+        training_rows = []
+        for label, key in (("Original detector", "baseline_test"), ("Fine tuned candidate", "candidate_test")):
+            values = experiment.get(key) or {}
+            training_rows.append({"Model": label, "Precision %": 100 * number(values.get("precision")),
+                                  "Recall %": 100 * number(values.get("recall")), "F1 %": 100 * number(values.get("f1")),
+                                  "Matched boxes": values.get("tp"), "Missed boxes": values.get("fn"), "Extra boxes": values.get("fp")})
+        st.dataframe(pd.DataFrame(training_rows), hide_index=True, width="stretch")
+        st.caption("This matched comparison uses 640 pixel inference and class agnostic suppression on 24 test frames. The original 416 pixel tracker comparison below uses a different profile. All existing reference boxes were drafted by an AI assistant and await human validation.")
+        st.download_button("Download fine tuning comparison", json.dumps(experiment, indent=2), file_name="finetuning_report.json", mime="application/json")
+    visibility = read_json(ROOT / "outputs" / "visibility_report.json")
+    if visibility:
+        st.markdown("**Visible car recovery experiment**")
+        st.write(visibility.get("conclusion", "Inspect the matched demo comparison below."))
+        with st.expander("Inspect visible car recovery evidence"):
+            st.json(visibility)
+    from driftlens.annotation_review_ui import render_annotation_review
+    render_annotation_review(ROOT, catalog)
     if selected:
         run_dir, summary = selected
         st.markdown("**Tracker comparison for the selected shot**")

@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "actual_private_upload_sha256": "passed",
+  "browser_result": "qa_upload_1790974493253",
+  "actual_role_rebuild": "passed on a verification copy",
+  "accepted_pairs_after_review": 20,
+  "explicit_unknown_reset": "passed",
+  "original_observations_unchanged": true,
+  "uploaded_source_metadata_preserved": true,
+  "original_browser_result_roles": "unassigned",
+  "scope": "Workflow checks on a reused source excerpt, not independent accuracy or human-reviewed training labels."
+}

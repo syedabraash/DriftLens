@@ -1,6 +1,6 @@
 # DriftLens scope
 
-Updated on 2 October 2026.
+Updated on 3 October 2026.
 
 DriftLens is an implemented local Formula Drift tandem tracking and run review project. Its independent root is `G:\DriftLens`, with its own Python environment. The user authorised implementation after supplying `longbeach2024_action.mp4`. PitWall and the banking project remain separate.
 
@@ -21,6 +21,7 @@ The default demonstration covers 1904.5 through 1931.2 seconds of the source, wi
 7. Export the annotated MP4, observations CSV, sampled frame manifest, frame metrics and run summary.
 8. Compare trackers on the same source interval and detector settings.
 9. Evaluate saved observations against the supplied sparse visual reference labels.
+10. Maintain a separate human annotation review queue, confirm corrected source boxes and shot local identities, tag smoke and overlap, and export only confirmed samples without changing frozen references.
 
 The original diagnostic comparison uses offline CPU inference sampling 10 frames per second at 416 pixel inference size. The complete run uses BoTSORT at 640 pixel inference with class agnostic suppression to reduce duplicate boxes on the same car. The analysis sampling rate is different from measured processing throughput. Actual settings and timing belong in each run summary. The first setup needs internet access for free Python packages and model weights; subsequent analysis runs locally.
 
@@ -42,7 +43,9 @@ These are diagnostic visual references rather than an expert verified benchmark.
 
 Sparse samples do not prove continuous tracking quality between labelled frames and cannot establish full HOTA, IDF1 or MOTA results. All footage comes from one event and venue. Broader robustness requires more events, denser annotations and independent human review. The saved annotation method and these limitations must accompany any numerical result.
 
-`outputs/evaluation_report.json` and `docs/RESULTS.md` hold the measured comparison when generated. The portfolio contribution is the documented shot selection, reproducible pipeline, useful local review interface, diagnostic comparison and honest failure analysis. No detector fine tuning is claimed.
+`outputs/evaluation_report.json` and `docs/RESULTS.md` hold the original measured comparison. A separate completed twelve epoch CPU detector adaptation used 24 training frames and eight validation frames from tuning battles. Its candidate reduced precision and recall on the frozen 24 frame test reference set at 640 pixel inference with class agnostic suppression. `outputs/finetuning_report.json` records the settings, counts and unsuccessful promotion gate. The original pretrained detector remains active. This is detector only diagnostic evidence using approximate assistant labels, not a verified improvement in tracking or run analysis.
+
+`outputs/annotation_review/queue.json` keeps proposed corrections separate from `data/annotations/labels.json`. A review needs a named reviewer, a timezone timestamp and explicit image, box and shot local identity confirmations. This records a self attestation, not expert certification. Pending records retain assistant draft provenance. Source bounds, classes, visibility, smoke and overlap tags, shot local identity scopes, fingerprints and video or battle split grouping are validated before export. The queue contains no human confirmations until a person actually supplies them. Frozen historical scores are not silently replaced by reviewed exports.
 
 ## Measurement boundaries
 

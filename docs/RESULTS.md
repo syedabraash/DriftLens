@@ -1,8 +1,22 @@
 # DriftLens measured results
 
-The local project opens with a complete tandem run from the official Formula DRIFT Long Beach 2024 Top 16 ALL ACTION broadcast. It also retains twelve diagnostic camera shots and six BoTSORT comparison exports. No detector training was performed. This is an offline review tool for a pretrained baseline.
+## Enhanced demonstration and uploads on 3 October 2026
 
-## Complete run demonstration
+The default `full_run02` reprocesses the same 26.7 second broadcast interval as the preserved `full_run01`, with the original YOLOv8n weights. Reviewed pair availability rises from 120/268 samples (44.8 percent) to 191/268 (71.3 percent). Per shot accepted pairs are 61/82, 38/49, 24/45 and 68/92. These descriptive results include source reviewed role intervals chosen on this demonstration, not an independent accuracy evaluation.
+
+In the final shot's last 1.8 seconds, both participants now have accepted current observations in all 18 sampled frames, compared with zero before. The green car's late detector boxes were originally classified as bottle, and two orange car boxes as cell phone. Conservative same camera appearance recovery preserves those source classes and scores and marks recovered boxes R in the replay. Thirty four exported observations use recovery; 23 accepted paired samples include it. Those scores are not car or identity probabilities.
+
+The profile uses 640 pixel inference with native and 90/270 degree orientation passes, class agnostic suppression, no global motion compensation, and low confidence tracking without score fusion. It took 284.888 seconds to process 268 samples on this CPU with uncontrolled load, compared with 109.624 seconds for the original replay. This gain costs processing time. A larger model and higher resolution probes did not reliably improve the late case and were not activated.
+
+Visible misses remain around the final hairpin at local times 3.0 to 4.1 seconds, with the orange car still untracked at 4.2 to 4.8 seconds. Merged boxes, parked vehicles and uncertain overlaps are excluded from pair geometry. No hidden positions are generated. The previous fine tuned candidate remains inactive because it regressed on its saved comparison.
+
+Uploads accept private local files up to 200 MB and intervals up to 60 seconds, returning current observations, an annotated replay, a readable review and CSV/JSON exports. Lead and chase remain unknown until visually assigned within bounded intervals. Camera cuts require separate decisions. Human annotation review is available in Evidence, with zero confirmed human labels so far. Stronger training needs diverse reviewed examples and a separate untouched event level test.
+
+The matched numerical report is `outputs/visibility_report.json`. Earlier measurements below retain their original profile and reference set.
+
+The local project opens with a complete tandem run from the official Formula DRIFT Long Beach 2024 Top 16 ALL ACTION broadcast. It also retains twelve diagnostic camera shots and six BoTSORT comparison exports. A completed twelve epoch detector adaptation experiment is recorded separately below. The original pretrained detector remains active because the candidate regressed on the frozen diagnostic test references.
+
+## Original 640 pixel complete run demonstration
 
 The source interval is 1904.5 through 1931.2 seconds, spanning 26.7 seconds and 801 original frames from launch and initiation through the visible finish. Four contiguous camera views produce 268 sampled frames and a 26.8 second combined replay at 10 fps. The timeline retains both exact source elapsed time and encoded playback time. Native player jumps use whole seconds with less than one second of pre-roll.
 
@@ -20,11 +34,21 @@ Pair availability means that both visually accepted roles had current tracker ob
 
 The AI assistant visually reviewed local track IDs against source car livery and travel order. Explicit half open role intervals exclude uncertain or merged boxes. Shot01 loses chase ID 2, and later ID 12 changes from a green or merged box to orange blue chase. In shot02, green lead fragments from ID 1 to ID 4; final merged boxes are excluded. In shot03, ID 14 changes from green lead to orange blue chase before green reacquires ID 17. Shot04 ID 29 also changes cars, while IDs 21, 24 and 32 are parked or off-track candidates. The late aerial pair is green lead ID 48 and orange blue chase ID 47. Tracking disappears again before the visible finish. These are curated AI visual decisions without human expert validation, not automatic identity guarantees.
 
-Charts break at camera cuts, mapping changes and unknown samples. Local IDs are never joined automatically across views. Video overlays clear trajectories when a reviewed role mapping changes. Users can inspect the interval map or override one camera shot's whole shot roles and rebuild the complete exports with rollback on failure.
+Charts break at camera cuts, mapping changes and unknown samples. Local IDs are never joined automatically across views. Video overlays clear trajectories when a reviewed role mapping changes. Users can edit ordered, nonoverlapping role intervals within a camera shot, preserve a single known role or mark an entire shot unknown. Uncovered time stays unknown. An optional whole shot assignment replaces that shot's interval map. Both modes rebuild complete exports and written conclusions with rollback on failure, recording an unverified user assignment rather than expert validation.
 
 The four detector jobs processed 268 frames in 109.624 seconds, an aggregate 2.445 fps on the inspected CPU. This includes decoding, inference and tracking, excluding model loading, role review and replay export. It is an offline demonstration with local workload variability.
 
 `data/full_run_catalog.json` records source frame boundaries, livery references, processing context and review intervals. `outputs/full_run_report.json` records the completed numerical summary. Full replay media and visual inspection sheets remain local and ignored by Git.
+
+## Local clip intake and readable review
+
+In **Process a clip**, **Analyze your own clip** accepts **Upload my video** or a saved local source. Supported video extensions are MP4, MOV, MKV, AVI and WebM. Uploads are limited to 200 MB and each analysis interval to 60 seconds. The selected analysis profile records its detector and tracker settings; this interface does not silently adopt the unsuccessful trained candidate.
+
+Processing creates sampled frame metadata, observed vehicle boxes, local tracker IDs, an annotated replay, a readable review, analysis JSON and numerical exports. Open the resulting selection in **Shot review**. A written review can explain unavailable measurements before roles are assigned; it does not infer physical identities, judging scores or driver skill. Timestamped review events and exact annotated sample images provide locations to inspect, rather than proving the event's cause automatically.
+
+Use **Correct roles within bounded clip intervals** after checking visible livery and travel order. Assigned track IDs must have been observed inside their intervals, and assigned intervals must stop at detected camera cuts. Leave uncertain IDs empty or use **Mark all clip roles unknown**. Saving rebuilds the replay, frame metrics and reports together. Pair measurements require two accepted current observations; a detector box alone does not establish a valid lead or chase role.
+
+Uploaded sources and derivatives remain private local files. Successfully uploading or processing a clip is not an accuracy evaluation on that footage. The current reference evidence remains limited to the selected Long Beach broadcast and approximate assistant labels. New events and personal videos need their own independent review and evaluation.
 
 ## What was measured
 
@@ -34,7 +58,7 @@ The AI assistant drafted the visual reference boxes and identities from source i
 
 Matching uses descending IoU with one match per box, IoU at least 0.5 and maximum frame alignment error of 0.1 seconds. All 24 test references aligned to processed frames. Counts include partial visibility; no fully hidden positions were invented.
 
-## Aggregate comparison
+## Original 416 pixel aggregate comparison
 
 The raw detector produced 41 matched boxes, seven unmatched predictions and seven missed reference boxes. Its precision, recall and F1 were each 85.4 percent. Raw detections are saved independently of confirmed tracker observations.
 
@@ -46,6 +70,31 @@ The raw detector produced 41 matched boxes, seven unmatched predictions and seve
 ByteTrack matched 40 of 48 reference boxes, missed eight and had zero unmatched confirmed predictions at the labelled times. BoTSORT matched 36, missed twelve and also had zero unmatched confirmed predictions. Those precision figures cover only this small sparse set; they do not establish that all detections throughout the videos are correct.
 
 BoTSORT's zero sampled identity changes comes with lower coverage and fewer comparable transitions. A miss breaks the identity comparison chain. Changes inside gaps or between unlabelled frames can therefore be uncounted. The evidence does not establish a universal better tracker.
+
+## Completed detector adaptation experiment
+
+`outputs/finetuning_report.json` records one completed twelve epoch CPU transfer learning experiment. Twenty four frames with 59 approximate boxes from two tuning battle groups were used for training. Eight frames with 20 boxes from a third tuning battle group were used for validation. The original 24 test frames with 48 boxes from separate battles remained frozen. The completed training took 203.637 seconds. The final run loaded 355 of 355 pretrained tensors from a fresh unfused checkpoint; earlier interrupted setup attempts were not selected.
+
+The candidate was selected by its best validation checkpoint before the final test comparison. These labels were drafted by the AI assistant without human expert review. The same broadcast, correlated frames and subjective visible extents limit what the experiment establishes. It is an actual training experiment, but it does not establish broad Formula Drift accuracy.
+
+Both detectors were evaluated at 640 pixel inference, confidence 0.15, suppression IoU 0.5, class agnostic suppression, COCO car and truck classes and matching IoU 0.5. This setting differs from the original 416 pixel comparison above, so the two sets of scores must not be combined.
+
+| Diagnostic comparison | Matched boxes | Unmatched predictions | Missed boxes | Precision | Recall | F1 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Baseline validation, 8 frames and 20 boxes | 14 | 4 | 6 | 77.8% | 70.0% | 73.7% |
+| Candidate validation, same references | 14 | 2 | 6 | 87.5% | 70.0% | 77.8% |
+| Baseline frozen test, 24 frames and 48 boxes | 44 | 1 | 4 | 97.8% | 91.7% | 94.6% |
+| Candidate frozen test, same references | 43 | 2 | 5 | 95.6% | 89.6% | 92.5% |
+
+Validation F1 improved by 4.1 percentage points, while test recall fell by 2.1 points and precision fell by 2.2 points. The candidate failed the promotion gate and remains an inspection artifact at `models/driftlens_finetuned.pt`. Original `models/yolov8n.pt` stays active; its baseline checksum and the frozen reference checksum are recorded in the report. Detector scores do not measure role correctness, full run pair availability or tracking accuracy. No automatic promotion or further training occurred as part of the review interface improvements.
+
+## Human annotation review readiness
+
+The separate review queue at `outputs/annotation_review/queue.json` starts with the 28 frozen reference samples as pending assistant drafts. Open **Evidence → Review reference labels for future training** to inspect original frames, edit source pixel boxes, classes and visibility, and record smoke and overlap tags. A name and three explicit confirmations are required to save a human self attestation. Creating the queue does not validate its labels. The delivered queue has zero human confirmations.
+
+`driftlens/annotation_review.py` and `tools/annotation_review.py` support queue creation, a named reviewer with a timezone timestamp and explicit image, box and shot local identity confirmations, validated import, and exports containing only confirmed samples. Review records preserve the original boxes and annotation method, while changes invalidate an existing confirmation. Bounds, car and truck classes, visibility, smoke and overlap tags, shot local identities and grouped splits are checked. Hidden cars cannot have invented boxes.
+
+The default battle grouping preserves the historical tuning and test separation within the source video. Video grouping can instead require an entire video to stay in one split; it rejects this broadcast's existing mixed split. Different battles from one broadcast still share camera and venue characteristics. Reviewed evaluator exports are separate from the frozen reference file, and detector exports retain split metadata, treating test samples as unavailable for training. Procedures are in `docs/EVALUATION.md`. Independent human checks, denser labels and a new event remain necessary before broader claims or another meaningful training experiment.
 
 ## Per shot diagnostics
 
@@ -88,7 +137,7 @@ The unit suite covers matching, duplicate boxes, frame alignment, sparse identit
 
 ## Reproduce and inspect
 
-Run `launch.cmd` to open Complete run. Shot review retains the shorter examples. The Evidence tab contains tracker comparisons, clip metadata, this report and the original JSON evaluation. Process a clip accepts another local continuous interval. Full run reproduction commands are in the evaluation notes.
+Run `launch.cmd` to open Complete run. Shot review retains the shorter examples and uploaded clip results with readable reports. Evidence contains separate saved comparisons, clip metadata, this report and the original JSON evaluation. Process a clip accepts a private upload or another saved local source interval. Full run reproduction and annotation review commands are in the evaluation notes.
 
 The exact source, weights and label hashes are in `outputs/reproducibility_manifest.json`. Direct dependencies are pinned in `requirements.txt`, with installed versions recorded in `requirements.lock.txt`. The evaluation procedure and catalogue commands are in `docs/EVALUATION.md`.
 

@@ -144,7 +144,7 @@ def assemble_full_run(manifest: dict, run_dir: Path) -> dict:
             raise ValueError("Stored camera shot uses a different source video")
         if abs(summary["start_seconds"] - shot["start_seconds"]) > TOLERANCE or abs(summary["end_seconds"] - shot["end_seconds"]) > TOLERANCE:
             raise ValueError("Stored shot range disagrees with the complete run manifest")
-        profile_keys = ("tracker", "model", "model_sha256", "imgsz", "sampled_fps", "agnostic_nms", "confidence_threshold", "pipeline_revision", "source_signature")
+        profile_keys = ("tracker", "model", "model_sha256", "imgsz", "sampled_fps", "agnostic_nms", "confidence_threshold", "pipeline_revision", "source_signature", "inference_profile", "tracker_options", "orientations", "recover_vehicle_classes")
         if summaries and any(summary.get(key) != summaries[0].get(key) for key in profile_keys):
             raise ValueError("Camera shots use inconsistent processing profiles or source signatures")
         summaries.append(summary)
@@ -165,6 +165,10 @@ def assemble_full_run(manifest: dict, run_dir: Path) -> dict:
     result["agnostic_nms"] = summaries[0].get("agnostic_nms", False)
     result["model"] = summaries[0].get("model")
     result["model_sha256"] = summaries[0].get("model_sha256")
+    result["source_class_names"] = summaries[0].get("source_class_names", {})
+    result["recovered_observations"] = sum(summary.get("recovered_observations", 0) for summary in summaries)
+    result["inference_profile"] = summaries[0].get("inference_profile", {})
+    result["manifest_path"] = manifest.get("manifest_path", "data/full_run_catalog.json")
     if any(row["role_status"] == "user_assignment_unverified" for row in shot_records):
         result["role_review_status"] = "mixed_assistant_and_user_assignments_no_expert_validation"
     elif not result["roles_reviewed_shots"]:
@@ -185,8 +189,18 @@ def assemble_full_run(manifest: dict, run_dir: Path) -> dict:
             writer.writeheader()
             writer.writerows(timeline)
         _save(stage / "shots.json", shot_records)
+        from .run_analysis import build_run_analysis, report_text
+        evidence = {}
+        for entry in entries:
+            directory = run_dir / "shots" / entry["id"]
+            evidence[entry["id"]] = {name: _read_csv(directory / f"{name}.csv") if (directory / f"{name}.csv").is_file() else None
+                                      for name in ("detections", "observations", "frames")}
+        analysis = build_run_analysis(result, timeline, shot_records, evidence)
+        _save(stage / "analysis.json", analysis)
+        (stage / "report.txt").write_text(report_text(analysis), encoding="utf-8")
+        result["files"].update(analysis="analysis.json", report="report.txt")
         _save(stage / "summary.json", result)
-        names = ("annotated.mp4", "timeline.csv", "shots.json", "summary.json")
+        names = ("annotated.mp4", "timeline.csv", "shots.json", "analysis.json", "report.txt", "summary.json")
         prior = stage / "prior"
         prior.mkdir()
         existing = set()
@@ -220,6 +234,9 @@ def assemble_full_run(manifest: dict, run_dir: Path) -> dict:
 def process_full_run(manifest_path: Path, tracker: str = "botsort", force: bool = False, imgsz: int = 640) -> dict:
     from .pipeline import analyze_video, render_run, video_info
     manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8-sig"))
+    manifest["manifest_path"] = Path(manifest_path).resolve().relative_to(ROOT).as_posix()
+    profile = manifest.get("inference_profile") or {}
+    model_name = profile.get("model_name", "yolov8n.pt")
     source = (ROOT / manifest["source"]["path"]).resolve()
     source.relative_to(ROOT)
     validate_run_manifest(manifest, video_info(source)["duration_seconds"])
@@ -232,9 +249,9 @@ def process_full_run(manifest_path: Path, tracker: str = "botsort", force: bool 
             return hashlib.file_digest(handle, "sha256").hexdigest()
     try:
         source_signature = {"size_bytes": source.stat().st_size, "modified_ns": source.stat().st_mtime_ns}
-        model_digest = digest(ROOT / "models/yolov8n.pt")
+        model_digest = digest(ROOT / "models" / model_name)
         has_review_map = any(shot.get("role_intervals") for shot in manifest["shots"])
-        review_source_matches = not has_review_map or (digest(source) == manifest.get("source_sha256") and model_digest == manifest.get("model_sha256"))
+        review_source_matches = not has_review_map or (digest(source) == manifest.get("source_sha256") and model_digest == manifest.get("model_sha256") and profile == manifest.get("role_review_profile", {}))
         for position, shot in enumerate(manifest["shots"]):
             destination = run_dir / "shots" / shot["id"]
             saved = destination / "summary.json"
@@ -242,9 +259,11 @@ def process_full_run(manifest_path: Path, tracker: str = "botsort", force: bool 
             same_settings = summary.get("status") == "complete" and summary.get("pipeline_revision") == 2 and summary.get("tracker") == tracker and summary.get("imgsz") == imgsz and summary.get("sampled_fps") == 10 and summary.get("agnostic_nms") is True and Path(summary.get("source_path", "")).resolve() == source and summary.get("source_signature") == source_signature and abs(summary.get("start_seconds", -1) - shot["start_seconds"]) <= TOLERANCE and abs(summary.get("end_seconds", -1) - shot["end_seconds"]) <= TOLERANCE
             print(f"Full run shot {position+1}/{len(manifest['shots'])}: {shot['label']}", flush=True)
             same_settings = same_settings and summary.get("model_sha256") == model_digest
+            same_settings = same_settings and summary.get("inference_profile", {}) == profile
             if force or not same_settings:
-                summary = analyze_video(source, destination, shot["start_seconds"], shot["end_seconds"], tracker, imgsz, 10, lambda progress, message: print(f"{progress:.0%} {message}", flush=True), agnostic_nms=True)
-            summary.update(full_run_id=manifest["id"], full_run_shot=shot["id"], full_run_offset_seconds=playback_offset, source_signature=source_signature, model_sha256=model_digest)
+                profile_arguments = {key: profile[key] for key in ("model_name", "tracker_options", "confidence_threshold", "orientations", "recover_vehicle_classes") if key in profile}
+                summary = analyze_video(source, destination, shot["start_seconds"], shot["end_seconds"], tracker, imgsz, 10, lambda progress, message: print(f"{progress:.0%} {message}", flush=True), agnostic_nms=True, **profile_arguments)
+            summary.update(full_run_id=manifest["id"], full_run_shot=shot["id"], full_run_offset_seconds=playback_offset, source_signature=source_signature, model_sha256=model_digest, inference_profile=profile)
             if shot.get("role_intervals") and review_source_matches and tracker == "botsort" and imgsz == 640 and summary.get("role_review_status") != "user_assignment_unverified":
                 summary = apply_reviewed_intervals(destination, summary, shot["role_intervals"])
             elif summary.get("role_review_status") == "assistant_visual_review" and not review_source_matches:
@@ -275,10 +294,13 @@ def apply_reviewed_intervals(run_dir: Path, summary: dict, intervals: list[dict]
     return summary
 
 
-def update_shot_roles(manifest_path: Path, run_dir: Path, shot_id: str, lead_id: int, chase_id: int) -> dict:
+def update_shot_roles(manifest_path: Path, run_dir: Path, shot_id: str,
+                      lead_id: int | None = None, chase_id: int | None = None,
+                      role_intervals: list[dict] | None = None) -> dict:
     """Review one camera shot and rebuild the complete exports, with rollback."""
     from .review import assign_roles
     manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8-sig"))
+    manifest["manifest_path"] = Path(manifest_path).resolve().relative_to(ROOT).as_posix()
     validate_run_manifest(manifest)
     run_dir = Path(run_dir).resolve()
     expected = (ROOT / "outputs/full_runs" / manifest["id"]).resolve()
@@ -290,21 +312,36 @@ def update_shot_roles(manifest_path: Path, run_dir: Path, shot_id: str, lead_id:
     backup.mkdir()
     saved_files = []
     try:
-        for label, directory, names in (("shot", child, ("summary.json", "frame_metrics.csv", "annotated.mp4")), ("run", run_dir, ("summary.json", "timeline.csv", "shots.json", "annotated.mp4"))):
+        for label, directory, names in (("shot", child, ("summary.json", "frame_metrics.csv", "annotated.mp4", "analysis.json", "report.txt")), ("run", run_dir, ("summary.json", "timeline.csv", "shots.json", "annotated.mp4", "analysis.json", "report.txt"))):
             for name in names:
                 source = directory / name
+                saved = None
                 if source.is_file():
                     saved = backup / f"{label}_{name}"
                     shutil.copyfile(source, saved)
-                    saved_files.append((source, saved))
-        revised = assign_roles(child, int(lead_id), int(chase_id))
-        revised["role_assignment_method"] = "User assigned local track IDs through the review interface; no independent human expert validation is asserted."
+                saved_files.append((source, saved))
+        if role_intervals is not None:
+            from .pipeline import render_run
+            current = json.loads((child / "summary.json").read_text(encoding="utf-8-sig"))
+            revised = apply_reviewed_intervals(child, current, role_intervals)
+            render_run(child, revised, _read_csv(child / "observations.csv"), _read_csv(child / "frames.csv"))
+        else:
+            if lead_id is None or chase_id is None:
+                raise ValueError("Choose both whole shot roles or supply an interval mapping.")
+            revised = assign_roles(child, int(lead_id), int(chase_id))
+        revised["role_assignment_method"] = "User assigned local track IDs or bounded role intervals through the review interface; no independent human expert validation is asserted."
         revised["role_review_status"] = "user_assignment_unverified"
         _save(child / "summary.json", revised)
+        from .run_analysis_ui import save_shot_analysis
+        save_shot_analysis(child, revised)
         return assemble_full_run(manifest, run_dir)
     except Exception:
         for original, saved in saved_files:
-            shutil.copyfile(saved, original)
+            if saved is not None:
+                shutil.copyfile(saved, original)
+            elif original.is_file():
+                original.relative_to(run_dir)
+                original.unlink()
         raise
     finally:
         resolved = backup.resolve()

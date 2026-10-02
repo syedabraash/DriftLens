@@ -16,7 +16,7 @@ The project lives separately from PitWall and the banking project. It uses a ded
 
 The downloaded source is `longbeach2024_action.mp4`. The prepared run covers source time 31:44.5 through 32:11.2, lasting 26.7 seconds. Its replay contains 268 sampled frames at ten frames per second and lasts 26.8 seconds because individual camera shots end between sampled frames. The timeline preserves both source time and replay time. Player jumps use whole seconds and may include less than one second before the selected shot.
 
-The Shot review tab retains the twelve original diagnostic clips. Process a clip accepts another continuous camera shot. Processing uses the CPU and may run slower than playback.
+The Shot review tab retains the twelve original diagnostic clips and your own results. In Process a clip, choose Upload my video to add a private local video of up to 200 MB and analyze an interval of up to 60 seconds. Processing uses the CPU and may run slower than playback. Your result includes a replay, a readable report and numerical exports. Confirm lead and chase roles to enable tandem separation measurements.
 
 ## What it does
 
@@ -28,6 +28,9 @@ The Shot review tab retains the twelve original diagnostic clips. Process a clip
 6. Computes a screen separation proxy using reviewed role assignments.
 7. Leaves measurements empty when either assigned car is missing.
 8. Compares saved results with independent visual reference boxes for detection precision, recall, visible coverage, and sparse identity checks.
+9. Explains accepted measurements and unknown intervals in a readable run report.
+10. Provides timestamped review events and exact annotated sample images.
+11. Records deliberate human frame reviews separately from frozen assistant reference labels.
 
 The [Ultralytics tracking documentation](https://docs.ultralytics.com/modes/track/) describes the tracking backend. OpenCV handles video processing, and Streamlit provides the local review interface.
 
@@ -37,9 +40,9 @@ Screen separation is the distance between bounding box centres divided by their 
 
 A missing observation or unknown role creates a gap in the chart. Tracker IDs are local to each camera shot. Lead and chase roles were visually reviewed by the AI assistant against source car livery and travel order, without human expert validation. Reviewed time intervals exclude ambiguous overlaps, parked vehicles and identity swaps. Role changes and camera cuts break chart lines. The project does not claim automatic identity association across cameras.
 
-The correction form can replace a shot's interval map with two selected IDs for the whole shot and rebuild the complete exports. Inspect the entire shot before accepting that override.
+Uploaded clips use a bounded role editor beside the replay. Assign each interval after checking visible liveries and travel order, and split decisions at camera cuts. Saved corrections rebuild the replay, metrics, readable report and analysis JSON together. Unreviewed time stays unknown. The Complete run editor also supports a whole camera shot correction.
 
-This version does not estimate metres, vehicle speed, drift angle, judging scores, or driver skill. It has no custom trained drift detector. The pretrained model is a baseline whose failures form part of the portfolio evidence.
+This version does not estimate metres, vehicle speed, drift angle, judging scores, or driver skill. One detector candidate was fine tuned for twelve epochs. Its diagnostic test results regressed, so the original weights were preserved. The Evidence tab shows that experiment separately from the earlier tracker comparison. Upload support does not establish accuracy on every event or personal video.
 
 ## Evidence and reproducibility
 
@@ -49,7 +52,9 @@ The original comparison uses 416 pixel inference. The complete replay uses BoTSO
 
 On 24 sparse test frames containing 48 reference car boxes, the raw detector precision and recall were both 85.4 percent. ByteTrack visible reference coverage was 83.3 percent with four sampled identity changes. BoTSORT coverage was 75.0 percent with zero changes across fewer comparable samples. These are small diagnostic results, using approximate boxes drafted visually by the AI assistant without human expert validation. They do not establish general accuracy or continuous identity correctness.
 
-Complete outputs are under `outputs/full_runs/full_run01`, including `annotated.mp4`, `timeline.csv`, `shots.json` and `summary.json`. Each child shot retains raw detections, confirmed observations and sampled frame metadata. `data/full_run_catalog.json` records source boundaries and explicit role review decisions. `outputs/full_run_report.json` is the numerical summary.
+The default enhanced replay is under `outputs/full_runs/full_run02`, including `annotated.mp4`, `timeline.csv`, `shots.json`, `summary.json`, `analysis.json` and `report.txt`. The original replay remains under `outputs/full_runs/full_run01`. Each child shot retains current detections, confirmed observations and sampled frame metadata. `data/full_run_enhanced_catalog.json` records the enhanced settings and source reviewed role decisions. `outputs/visibility_report.json` contains the matched comparison.
+
+On this reused demonstration, reviewed pair availability increased from 44.8 percent to 71.3 percent, or 191 of 268 sampled frames. Both cars now have accepted current observations in all eighteen final samples of the aerial shot, compared with zero previously. Orientation passes, tracker settings and conservative recent appearance recovery produced this gain with the original weights. Experimental recovered boxes display R and preserve their original predicted class and score. No hidden position is reconstructed. Remaining visible misses and merged boxes are excluded from pair measurements. This result is not an independent accuracy benchmark or proof of reliability on other footage.
 
 [Evaluation notes](docs/EVALUATION.md) explain the annotation format, commands, matching rules, and limitations. Evaluation figures belong to their specific labelled clips and settings. Sparse labels are not a complete tracking benchmark.
 

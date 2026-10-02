@@ -23,3 +23,11 @@ outputs/logs/
 outputs/finetuning/
 outputs/*.log
 .streamlit/secrets.toml
+
+data/uploads/
+
+outputs/annotation_review/
+
+outputs/visibility_diagnostic/
+
+outputs/upload_validation/

@@ -1,0 +1,387 @@
+{
+  "source": {
+    "path": "longbeach2024_action.mp4",
+    "url": "https://www.youtube.com/watch?v=nobounLesY4",
+    "title": "Formula DRIFT Long Beach Top 16 ALL ACTION",
+    "event": "Long Beach 2024",
+    "width": 1280,
+    "height": 720,
+    "fps": 30,
+    "reuse_status": "Not verified; local file supplied by user; keep raw footage private"
+  },
+  "id": "full_run02",
+  "title": "Enhanced tandem review with visible class recovery",
+  "label": "Green pink lead and orange blue chase complete tandem run",
+  "run_group": "battle05_green_orange",
+  "purpose": "Full run demonstration and review; includes material already used in the sparse test clips and is not an additional independent test",
+  "start_seconds": 1904.5,
+  "end_seconds": 1931.2,
+  "source_start_seconds": 1904.5,
+  "source_end_seconds": 1931.2,
+  "coverage": "initiation_to_finish",
+  "start_frame": 57135,
+  "end_frame_exclusive": 57936,
+  "duration_seconds": 26.7,
+  "frame_count": 801,
+  "interval_convention": "Half open source frame intervals; each shot includes its start frame and excludes its end frame",
+  "local_source_complete_coverage": true,
+  "completeness_basis": "AI assistant visually inspected the continuous source interval. Launch, initiation, bridge transition, outer zone, final hairpin, and both cars straightening into the visible exit are shown before the first pit shot at frame 57936. The catalog covers all 801 source frames without omitted interior intervals; no replay or talking segment is selected.",
+  "unavailable_coverage": [],
+  "limitations": "Complete coverage refers to the run as presented in the local broadcast, not continuous observation of every car pixel or verification of official course timing. Smoke, overlap, motion blur, trees, and camera cuts interrupt visibility. Car descriptions and approximate reference boxes were drafted by AI assistant independently of detector predictions, with no human expert review. Reference boxes and travel order are not tracking IDs. Physical distance, drift angle, speed, and official judging are unavailable from these images.",
+  "inspection": {
+    "overview": "outputs/full_run_inspection/overview.jpg",
+    "boundaries": "outputs/full_run_inspection/boundaries.jpg",
+    "role_grid": "outputs/full_run_inspection/role_reference_grid.jpg",
+    "role_reference_qa": "outputs/full_run_inspection/role_reference_qa.jpg"
+  },
+  "shots": [
+    {
+      "id": "shot01",
+      "start_seconds": 1904.5,
+      "end_seconds": 1912.6666666666667,
+      "start_frame": 57135,
+      "end_frame_exclusive": 57380,
+      "label": "Launch and first initiation with camera pan",
+      "lead_description": "Green front and roof with pink rear and sides",
+      "chase_description": "Orange roof and hood with blue and white body",
+      "roles_uncertain": false,
+      "visibility_notes": "Both cars are initially clear. They overlap through initiation, followed by a rapid camera pan and tire smoke.",
+      "role_reference": {
+        "source_seconds": 1906.3,
+        "coordinate_space": "source_pixels",
+        "lead_bbox": [
+          924,
+          384,
+          1076,
+          484
+        ],
+        "chase_bbox": [
+          382,
+          380,
+          530,
+          477
+        ],
+        "image": "outputs/full_run_inspection/shot01_reference.jpg",
+        "method": "AI assistant visual reference, supported by subsequent travel order through initiation; independent of detector predictions",
+        "no_human_expert_review": true
+      },
+      "role_intervals": [
+        {
+          "start_clip_seconds": 0,
+          "end_clip_seconds": 5.8,
+          "lead_id": 1,
+          "chase_id": 2,
+          "review_basis": "Separate green pink lead1 and orange blue chase2 confirmed from aligned source livery and travel order."
+        },
+        {
+          "start_clip_seconds": 5.8,
+          "end_clip_seconds": 7.9,
+          "lead_id": null,
+          "chase_id": null,
+          "review_basis": "Overlap produces merged participant boxes; ID27 also spans both cars before7.9s. Exclude ambiguous geometry."
+        },
+        {
+          "start_clip_seconds": 7.9,
+          "end_clip_seconds": 8.166666666666742,
+          "lead_id": 1,
+          "chase_id": 27,
+          "review_basis": "Source and replay show distinct green lead1 and orange blue chase27 at7.9,8.0,8.1s."
+        }
+      ],
+      "lead_id": null,
+      "chase_id": null,
+      "excluded_local_ids": [
+        10,
+        15,
+        18,
+        19
+      ],
+      "role_failure_notes": "Merged, parked and ambiguous candidates are excluded by explicit reviewed intervals; missing current observations remain missing."
+    },
+    {
+      "id": "shot02",
+      "start_seconds": 1912.6666666666667,
+      "end_seconds": 1917.5666666666666,
+      "start_frame": 57380,
+      "end_frame_exclusive": 57527,
+      "label": "Bridge transition",
+      "lead_description": "Green front and roof with pink rear and sides",
+      "chase_description": "Orange roof and hood with blue and white body",
+      "roles_uncertain": false,
+      "visibility_notes": "Lead car remains in front through the turn. Chase car is partially overlapped and affected by smoke.",
+      "role_reference": {
+        "source_seconds": 1913.7,
+        "coordinate_space": "source_pixels",
+        "lead_bbox": [
+          594,
+          196,
+          890,
+          320
+        ],
+        "chase_bbox": [
+          430,
+          190,
+          664,
+          300
+        ],
+        "image": "outputs/full_run_inspection/shot02_reference.jpg",
+        "method": "AI assistant visual reference from livery and observed travel order; independent of detector predictions",
+        "no_human_expert_review": true
+      },
+      "role_intervals": [
+        {
+          "start_clip_seconds": 0,
+          "end_clip_seconds": 2.7,
+          "lead_id": 2,
+          "chase_id": 1,
+          "review_basis": "Green pink lead2 and orange blue chase1 are distinct; IDs are reviewed independently in this camera."
+        },
+        {
+          "start_clip_seconds": 2.7,
+          "end_clip_seconds": 3.1,
+          "lead_id": null,
+          "chase_id": null,
+          "review_basis": "Close overlap and an oversized single box; exclude pair measurements."
+        },
+        {
+          "start_clip_seconds": 3.1,
+          "end_clip_seconds": 4.2,
+          "lead_id": 2,
+          "chase_id": 1,
+          "review_basis": "Separate source-confirmed lead2 and chase1 boxes after overlap."
+        },
+        {
+          "start_clip_seconds": 4.2,
+          "end_clip_seconds": 4.9,
+          "lead_id": null,
+          "chase_id": null,
+          "review_basis": "Late boxes span both cars or smoke; a high observation count does not establish correct geometry."
+        }
+      ],
+      "lead_id": null,
+      "chase_id": null,
+      "excluded_local_ids": [],
+      "role_failure_notes": "Merged, parked and ambiguous candidates are excluded by explicit reviewed intervals; missing current observations remain missing."
+    },
+    {
+      "id": "shot03",
+      "start_seconds": 1917.5666666666666,
+      "end_seconds": 1922.0,
+      "start_frame": 57527,
+      "end_frame_exclusive": 57660,
+      "label": "Outer zone and transition",
+      "lead_description": "Green front and roof with pink rear and sides",
+      "chase_description": "Orange roof and hood with blue and white body",
+      "roles_uncertain": false,
+      "visibility_notes": "Cars begin small in the frame, then pass close to the camera and overlap in smoke. Their liveries remain distinguishable in the reference frame.",
+      "role_reference": {
+        "source_seconds": 1919.2,
+        "coordinate_space": "source_pixels",
+        "lead_bbox": [
+          412,
+          278,
+          614,
+          364
+        ],
+        "chase_bbox": [
+          498,
+          268,
+          674,
+          346
+        ],
+        "image": "outputs/full_run_inspection/shot03_reference.jpg",
+        "method": "AI assistant visual reference from livery and continuity of travel order; independent of detector predictions",
+        "no_human_expert_review": true
+      },
+      "role_intervals": [
+        {
+          "start_clip_seconds": 0,
+          "end_clip_seconds": 0.5,
+          "lead_id": null,
+          "chase_id": null,
+          "review_basis": "ID1 is an off-track bin; early IDs2/4 include both small cars. Roles remain unknown."
+        },
+        {
+          "start_clip_seconds": 0.5,
+          "end_clip_seconds": 2.5,
+          "lead_id": 4,
+          "chase_id": 7,
+          "review_basis": "Distinct green pink lead4 and orange blue chase7 confirmed by livery."
+        },
+        {
+          "start_clip_seconds": 2.5,
+          "end_clip_seconds": 2.8,
+          "lead_id": null,
+          "chase_id": null,
+          "review_basis": "Merged box or absent observation during overlap."
+        },
+        {
+          "start_clip_seconds": 2.8,
+          "end_clip_seconds": 2.9,
+          "lead_id": 4,
+          "chase_id": 7,
+          "review_basis": "Focused2.8s source and replay show separate participant boxes."
+        },
+        {
+          "start_clip_seconds": 2.9,
+          "end_clip_seconds": 3.8,
+          "lead_id": null,
+          "chase_id": null,
+          "review_basis": "Merged or absent boxes during close overlap; recovery labels do not make merged geometry acceptable."
+        },
+        {
+          "start_clip_seconds": 3.8,
+          "end_clip_seconds": 4.3,
+          "lead_id": 4,
+          "chase_id": 7,
+          "review_basis": "Source-confirmed green lead4 and orange chase7 separate again; any missing observation remains missing."
+        },
+        {
+          "start_clip_seconds": 4.3,
+          "end_clip_seconds": 4.433333333333394,
+          "lead_id": null,
+          "chase_id": null,
+          "review_basis": "Both current tracks disappear before the next camera cut."
+        }
+      ],
+      "lead_id": null,
+      "chase_id": null,
+      "excluded_local_ids": [
+        1,
+        2
+      ],
+      "role_failure_notes": "Merged, parked and ambiguous candidates are excluded by explicit reviewed intervals; missing current observations remain missing."
+    },
+    {
+      "id": "shot04",
+      "start_seconds": 1922.0,
+      "end_seconds": 1931.2,
+      "start_frame": 57660,
+      "end_frame_exclusive": 57936,
+      "label": "Aerial final hairpin and visible finish",
+      "lead_description": "Green front and roof with pink rear and sides",
+      "chase_description": "Orange roof and hood with blue and white body",
+      "roles_uncertain": false,
+      "visibility_notes": "Tree branches partly cover the cars around the hairpin. Both emerge, straighten, and remain visible on the exit before the broadcast cuts to the pit.",
+      "role_reference": {
+        "source_seconds": 1923.0,
+        "coordinate_space": "source_pixels",
+        "lead_bbox": [
+          728,
+          282,
+          890,
+          404
+        ],
+        "chase_bbox": [
+          572,
+          306,
+          714,
+          438
+        ],
+        "image": "outputs/full_run_inspection/shot04_reference.jpg",
+        "method": "AI assistant visual reference from distinctive roof colors and observed travel order; independent of detector predictions",
+        "no_human_expert_review": true
+      },
+      "role_intervals": [
+        {
+          "start_clip_seconds": 0,
+          "end_clip_seconds": 2.7,
+          "lead_id": 1,
+          "chase_id": 2,
+          "review_basis": "Distinct source-confirmed green pink lead1 and orange blue chase2; individual missing samples are not filled."
+        },
+        {
+          "start_clip_seconds": 2.7,
+          "end_clip_seconds": 2.9,
+          "lead_id": null,
+          "chase_id": 2,
+          "review_basis": "Orange chase2 has a distinct box under branches; lead lacks an accepted observation."
+        },
+        {
+          "start_clip_seconds": 2.9,
+          "end_clip_seconds": 3,
+          "lead_id": 1,
+          "chase_id": 2,
+          "review_basis": "Focused2.9s inspection confirms two distinct participant boxes under branches."
+        },
+        {
+          "start_clip_seconds": 3,
+          "end_clip_seconds": 4.2,
+          "lead_id": null,
+          "chase_id": null,
+          "review_basis": "Both cars are still visually present through the hairpin but lack accepted current observations."
+        },
+        {
+          "start_clip_seconds": 4.2,
+          "end_clip_seconds": 4.9,
+          "lead_id": 1,
+          "chase_id": null,
+          "review_basis": "Distinct green lead1 box; visible orange chase remains untracked."
+        },
+        {
+          "start_clip_seconds": 4.9,
+          "end_clip_seconds": 9.2,
+          "lead_id": 1,
+          "chase_id": 26,
+          "review_basis": "Separate current boxes on green pink lead1 and orange blue chase26 through every remaining finish sample."
+        }
+      ],
+      "lead_id": null,
+      "chase_id": null,
+      "excluded_local_ids": [
+        5,
+        14,
+        21,
+        44,
+        45
+      ],
+      "role_failure_notes": "Merged, parked and ambiguous candidates are excluded by explicit reviewed intervals; missing current observations remain missing."
+    }
+  ],
+  "role_review_method": "AI assistant review of aligned source and numbered replay, using distinctive livery and travel order. Dense inspection at uncertain interval boundaries; shot04 inspected at all92 sampled timestamps. No human expert validation and no automatic association across cuts.",
+  "role_processing_profile": {
+    "model": "yolov8n.pt",
+    "tracker": "botsort",
+    "imgsz": 640,
+    "confidence_threshold": 0.15,
+    "sampled_fps": 10,
+    "agnostic_nms": true
+  },
+  "source_sha256": "fdc9d4f8d4a8226affa4405164529de4e4bcdeafbd14c2aa19d09be8668da84f",
+  "model_sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+  "manifest_path": "data/full_run_enhanced_catalog.json",
+  "inference_profile": {
+    "model_name": "yolov8n.pt",
+    "confidence_threshold": 0.15,
+    "orientations": [
+      0,
+      90,
+      270
+    ],
+    "recover_vehicle_classes": true,
+    "tracker_options": {
+      "gmc_method": "none",
+      "fuse_score": false,
+      "track_high_thresh": 0.15,
+      "new_track_thresh": 0.15,
+      "track_low_thresh": 0.1
+    }
+  },
+  "role_review_profile": {
+    "model_name": "yolov8n.pt",
+    "confidence_threshold": 0.15,
+    "orientations": [
+      0,
+      90,
+      270
+    ],
+    "recover_vehicle_classes": true,
+    "tracker_options": {
+      "gmc_method": "none",
+      "fuse_score": false,
+      "track_high_thresh": 0.15,
+      "new_track_thresh": 0.15,
+      "track_low_thresh": 0.1
+    }
+  }
+}

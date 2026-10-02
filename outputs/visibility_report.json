@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "scope": "Matched reused 26.7 second demonstration; not independent detector accuracy or expert validation.",
+  "baseline": {
+    "run_id": "full_run01",
+    "source_start": 1904.5,
+    "source_end": 1931.2,
+    "sampled_frames": 268,
+    "accepted_pair_samples": 120,
+    "pair_coverage": 0.44776119402985076,
+    "processing_seconds": 109.624,
+    "shots": [
+      {
+        "shot_id": "shot01",
+        "samples": 82,
+        "accepted_pair_samples": 58,
+        "tracked_frames": 79,
+        "no_selected_candidate_frames": 0,
+        "candidate_frames_without_tracks": 3,
+        "recovered_observations": 0
+      },
+      {
+        "shot_id": "shot02",
+        "samples": 49,
+        "accepted_pair_samples": 34,
+        "tracked_frames": 49,
+        "no_selected_candidate_frames": 0,
+        "candidate_frames_without_tracks": 0,
+        "recovered_observations": 0
+      },
+      {
+        "shot_id": "shot03",
+        "samples": 45,
+        "accepted_pair_samples": 10,
+        "tracked_frames": 17,
+        "no_selected_candidate_frames": 7,
+        "candidate_frames_without_tracks": 21,
+        "recovered_observations": 0
+      },
+      {
+        "shot_id": "shot04",
+        "samples": 92,
+        "accepted_pair_samples": 18,
+        "tracked_frames": 35,
+        "no_selected_candidate_frames": 21,
+        "candidate_frames_without_tracks": 36,
+        "recovered_observations": 0
+      }
+    ],
+    "recovered_selected_boxes": null,
+    "accepted_pair_samples_with_recovery": null
+  },
+  "enhanced": {
+    "run_id": "full_run02",
+    "source_start": 1904.5,
+    "source_end": 1931.2,
+    "sampled_frames": 268,
+    "accepted_pair_samples": 191,
+    "pair_coverage": 0.7126865671641791,
+    "processing_seconds": 284.888,
+    "shots": [
+      {
+        "shot_id": "shot01",
+        "samples": 82,
+        "accepted_pair_samples": 61,
+        "tracked_frames": 82,
+        "no_selected_candidate_frames": 0,
+        "candidate_frames_without_tracks": 0,
+        "recovered_observations": 0
+      },
+      {
+        "shot_id": "shot02",
+        "samples": 49,
+        "accepted_pair_samples": 38,
+        "tracked_frames": 49,
+        "no_selected_candidate_frames": 0,
+        "candidate_frames_without_tracks": 0,
+        "recovered_observations": 2
+      },
+      {
+        "shot_id": "shot03",
+        "samples": 45,
+        "accepted_pair_samples": 24,
+        "tracked_frames": 40,
+        "no_selected_candidate_frames": 4,
+        "candidate_frames_without_tracks": 1,
+        "recovered_observations": 9
+      },
+      {
+        "shot_id": "shot04",
+        "samples": 92,
+        "accepted_pair_samples": 68,
+        "tracked_frames": 81,
+        "no_selected_candidate_frames": 10,
+        "candidate_frames_without_tracks": 1,
+        "recovered_observations": 23
+      }
+    ],
+    "recovered_selected_boxes": 34,
+    "accepted_pair_samples_with_recovery": 23
+  },
+  "finish_window": [
+    {
+      "run_id": "full_run01",
+      "samples": 18,
+      "accepted_pairs": 0
+    },
+    {
+      "run_id": "full_run02",
+      "samples": 18,
+      "accepted_pairs": 18
+    }
+  ],
+  "inference_profile": {
+    "model_name": "yolov8n.pt",
+    "confidence_threshold": 0.15,
+    "orientations": [
+      0,
+      90,
+      270
+    ],
+    "recover_vehicle_classes": true,
+    "tracker_options": {
+      "gmc_method": "none",
+      "fuse_score": false,
+      "track_high_thresh": 0.15,
+      "new_track_thresh": 0.15,
+      "track_low_thresh": 0.1
+    }
+  },
+  "conclusion": "Reviewed pair availability on this reused demo increased from 44.8% to 71.3%. Both cars have accepted current observations in all 18 final samples from 7.4 seconds onward in shot04, compared with none previously. Remaining visible misses and ambiguous overlaps are retained as gaps. This does not establish accuracy on other videos.",
+  "model_weights_changed": false,
+  "new_training_performed": false,
+  "human_reviewed_frames": 0,
+  "remaining_visible_misses": [
+    "shot04 both cars3.0to4.1s",
+    "shot04 visible orange car4.2to4.8s",
+    "shot03 last two samples",
+    "ambiguous merged boxes in shots01to03"
+  ],
+  "negative_experiments": [
+    "YOLOv8s640 missed more participant boxes in the late probe than existing nano weights.",
+    "Higher resolution960/1280 did not reliably recover the green finish car.",
+    "Native appearance ReID was not promoted because multi-pass and recovery provenance needs separate validation."
+  ],
+  "provenance_note": "R boxes are current detector outputs matched conservatively to a recent same-view vehicle anchor. Original class and its confidence remain exported; confidence is not car or identity probability. No hidden position is synthesized.",
+  "limitation": "Profile and role intervals were chosen on this reused demo. Processing timings include uncontrolled machine load. Upload operation is tested separately from arbitrary-footage accuracy. A stronger trained model needs reviewed labels from diverse events and an untouched event-level test."
+}

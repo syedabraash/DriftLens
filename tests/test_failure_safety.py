@@ -10,6 +10,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+import yaml  # Keep PyYAML and its C loader alive across mocked sys.modules scopes.
 
 from driftlens import pipeline, review
 

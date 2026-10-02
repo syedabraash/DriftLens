@@ -270,6 +270,28 @@ full_catalog = json.loads((root / "data/full_run_catalog.json").read_text(encodi
 verification["full_runs"] = [verify_full_run(full_catalog)]
 verification["full_runs_checked"] = 1
 verification["full_run_child_results_checked"] = 4
+enhanced_catalog_path = root / "data/full_run_enhanced_catalog.json"
+if enhanced_catalog_path.exists():
+    enhanced_catalog = json.loads(enhanced_catalog_path.read_text(encoding="utf-8-sig"))
+    verification["full_runs"].append(verify_full_run(enhanced_catalog))
+    verification["full_runs_checked"] += 1
+    verification["full_run_child_results_checked"] += 4
+    enhanced_dir = root / "outputs/full_runs" / enhanced_catalog["id"]
+    report = json.loads((enhanced_dir / "analysis.json").read_text(encoding="utf-8"))
+    enhanced_summary = json.loads((enhanced_dir / "summary.json").read_text(encoding="utf-8"))
+    require(enhanced_summary["inference_profile"] == enhanced_catalog["inference_profile"] == enhanced_catalog["role_review_profile"], "Enhanced review and processing profiles disagree")
+    require(report["accepted_paired_samples"] == enhanced_summary["paired_frames"], "Enhanced written report disagrees with replay metrics")
+    recovered = 0
+    for shot in enhanced_catalog["shots"]:
+        child = enhanced_dir / "shots" / shot["id"]
+        for row in load_rows(child, "observations.csv"):
+            if row.get("detection_method") == "temporal_appearance_class_recovery":
+                require(int(row["source_class_id"]) not in {2,7}, "Recovered class was misrepresented as a native vehicle prediction")
+                require(int(row["vehicle_anchor_class"]) in {2,7}, "Recovery has no vehicle-class anchor")
+                require(number(row["appearance_similarity"]) >= .65, "Recovery violated its appearance threshold")
+                recovered += 1
+    require(recovered == report["box_provenance"]["recovered_tracked_boxes"], "Recovered observation count disagrees with analysis")
+    verification["enhanced_report_and_recovery_provenance"] = "passed"
 verification["status"] = "passed"
 (root / "outputs/verification_report.json").write_text(json.dumps(verification, indent=2) + "\n", encoding="utf-8")
 print(json.dumps(verification))
