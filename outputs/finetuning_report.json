@@ -1,0 +1,497 @@
+{
+  "status": "complete",
+  "training_seconds": 203.637,
+  "training_frames": 24,
+  "validation_frames": 8,
+  "test_frames": 24,
+  "train_groups": [
+    "battle02_white_red_blue",
+    "battle03_taguchi_minowa"
+  ],
+  "validation_groups": [
+    "battle04_white_gold_black"
+  ],
+  "baseline_sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+  "candidate_sha256": "b6facd4782bd546015c2461d52af37795134957b7c38e0ed0f0c1210adbd7d61",
+  "frozen_reference_sha256": "6c268dca045b1ba635232eb37808c7ff17827b6cc5c918f6762c3a3debec80cb",
+  "annotation_method": "Visual reference boxes drafted by AI assistant from original source images and contact sheets, independently of detector predictions. Approximate visible extents in 1280 by 720 source pixels. No human expert review.",
+  "limitations": [
+    "Small sample from one event and three battles; adjacent source frames are correlated.",
+    "Boxes describe approximate visible extents, including partially occluded vehicles, rather than inferred hidden positions.",
+    "Fully hidden chase car in clip04_00 is omitted. Barely identifiable cropped background roof fragments in clip01_02 are omitted.",
+    "Tiny parked vehicle boxes and smoke obscured extents have greater annotation uncertainty.",
+    "Orange and white generator trailers beside clip05_03 are equipment, not car or truck labels.",
+    "These AI assisted visual references are not certified human ground truth and have not received expert validation."
+  ],
+  "evaluation_settings": {
+    "imgsz": 640,
+    "confidence": 0.15,
+    "iou": 0.5,
+    "agnostic_nms": true,
+    "classes": [
+      2,
+      7
+    ],
+    "matching_iou": 0.5
+  },
+  "baseline_validation": {
+    "tp": 14,
+    "fp": 4,
+    "fn": 6,
+    "precision": 0.7777777777777778,
+    "recall": 0.7,
+    "f1": 0.7368421052631577,
+    "frames": 8,
+    "reference_boxes": 20,
+    "per_frame": [
+      {
+        "id": "clip05_00",
+        "tp": 1,
+        "fp": 0,
+        "fn": 3
+      },
+      {
+        "id": "clip05_01",
+        "tp": 2,
+        "fp": 0,
+        "fn": 2
+      },
+      {
+        "id": "clip05_02",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip05_03",
+        "tp": 2,
+        "fp": 3,
+        "fn": 0
+      },
+      {
+        "id": "clip06_00",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip06_01",
+        "tp": 1,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "id": "clip06_02",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip06_03",
+        "tp": 2,
+        "fp": 1,
+        "fn": 0
+      }
+    ]
+  },
+  "candidate_validation": {
+    "tp": 14,
+    "fp": 2,
+    "fn": 6,
+    "precision": 0.875,
+    "recall": 0.7,
+    "f1": 0.7777777777777777,
+    "frames": 8,
+    "reference_boxes": 20,
+    "per_frame": [
+      {
+        "id": "clip05_00",
+        "tp": 1,
+        "fp": 0,
+        "fn": 3
+      },
+      {
+        "id": "clip05_01",
+        "tp": 2,
+        "fp": 0,
+        "fn": 2
+      },
+      {
+        "id": "clip05_02",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip05_03",
+        "tp": 1,
+        "fp": 1,
+        "fn": 1
+      },
+      {
+        "id": "clip06_00",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip06_01",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip06_02",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip06_03",
+        "tp": 2,
+        "fp": 1,
+        "fn": 0
+      }
+    ]
+  },
+  "baseline_test": {
+    "tp": 44,
+    "fp": 1,
+    "fn": 4,
+    "precision": 0.9777777777777777,
+    "recall": 0.9166666666666666,
+    "f1": 0.946236559139785,
+    "frames": 24,
+    "reference_boxes": 48,
+    "per_frame": [
+      {
+        "id": "clip07_0",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip07_1",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip07_2",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip07_3",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip08_4",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip08_5",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip08_6",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip08_7",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip09_8",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip09_9",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip09_10",
+        "tp": 1,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "id": "clip09_11",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip10_12",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip10_13",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip10_14",
+        "tp": 1,
+        "fp": 1,
+        "fn": 1
+      },
+      {
+        "id": "clip10_15",
+        "tp": 0,
+        "fp": 0,
+        "fn": 2
+      },
+      {
+        "id": "clip11_16",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip11_17",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip11_18",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip11_19",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip12_20",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip12_21",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip12_22",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip12_23",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      }
+    ]
+  },
+  "candidate_test": {
+    "tp": 43,
+    "fp": 2,
+    "fn": 5,
+    "precision": 0.9555555555555556,
+    "recall": 0.8958333333333334,
+    "f1": 0.924731182795699,
+    "frames": 24,
+    "reference_boxes": 48,
+    "per_frame": [
+      {
+        "id": "clip07_0",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip07_1",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip07_2",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip07_3",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip08_4",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip08_5",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip08_6",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip08_7",
+        "tp": 2,
+        "fp": 1,
+        "fn": 0
+      },
+      {
+        "id": "clip09_8",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip09_9",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip09_10",
+        "tp": 1,
+        "fp": 0,
+        "fn": 1
+      },
+      {
+        "id": "clip09_11",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip10_12",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip10_13",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip10_14",
+        "tp": 1,
+        "fp": 1,
+        "fn": 1
+      },
+      {
+        "id": "clip10_15",
+        "tp": 0,
+        "fp": 0,
+        "fn": 2
+      },
+      {
+        "id": "clip11_16",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip11_17",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip11_18",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip11_19",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip12_20",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip12_21",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip12_22",
+        "tp": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "id": "clip12_23",
+        "tp": 1,
+        "fp": 0,
+        "fn": 1
+      }
+    ]
+  },
+  "meets_promotion_gate": false,
+  "active_model_changed": false,
+  "selection": "best validation checkpoint only; one final test comparison, no test-driven retraining",
+  "note": "Detector quality only. Role identity, full-run pair availability and model deployment require fresh tracking and visual role review.",
+  "preserved_original_files": [
+    "driftlens\\full_run.py",
+    "data\\clip_catalog.json",
+    "data\\full_run_catalog.json",
+    "README.md",
+    "data\\annotations\\labels.json",
+    "driftlens\\full_run_ui.py",
+    "models\\yolov8n.pt",
+    "driftlens\\pipeline.py",
+    "app.py",
+    "outputs\\full_runs\\full_run01\\annotated.mp4",
+    "outputs\\full_runs\\full_run01\\summary.json"
+  ],
+  "train_labelled_boxes": 59,
+  "validation_labelled_boxes": 20,
+  "epochs_completed": 12,
+  "pretrained_weights_loaded": "355 of355 tensors; fresh unfused checkpoint",
+  "training_cpu_runtime": "polars-runtime-compat1.44.2; POLARS_FORCE_PKG=compat",
+  "decision": "Candidate retained for inspection. Original detector stays active because the candidate reduced untouched-test recall and precision. No additional experiments launched to conserve account usage.",
+  "independent_test_scope": "Same frozen24 sparse test frames/48 assistant-drafted visible boxes at640 pixels/class agnostic suppression; this is distinct from original416 pixel diagnostic scores and is not expert-validated accuracy.",
+  "interrupted_attempts": [
+    "Old CPU incompatible default Polars runtime, repaired with matching compatibility wheel.",
+    "Prediction fused the checkpoint before training, detected from70/355 weight transfer and corrected by loading a fresh unfused model. Interrupted candidates were not selected."
+  ]
+}

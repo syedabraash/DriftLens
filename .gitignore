@@ -20,5 +20,6 @@ outputs/screenshots/
 outputs/full_runs/
 outputs/full_run_inspection/
 outputs/logs/
+outputs/finetuning/
 outputs/*.log
 .streamlit/secrets.toml
