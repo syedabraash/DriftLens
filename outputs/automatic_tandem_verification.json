@@ -1,0 +1,541 @@
+{
+  "evidence_type": "Private uploaded clip used for tuning and regression, not an independent accuracy benchmark",
+  "sampled_frames": 555,
+  "views": 6,
+  "seed_seconds": [
+    0,
+    2
+  ],
+  "baseline_role_availability": {
+    "automatic_paired_frames": 77,
+    "total_paired_frames": 107
+  },
+  "enhanced_role_availability": {
+    "automatic_paired_frames": 121,
+    "total_paired_frames": 151
+  },
+  "summary": {
+    "method": "seed_livery_and_frozen_local_consensus_v2",
+    "settings": {
+      "min_similarity": 0.9,
+      "min_role_margin": 0.04,
+      "min_candidate_margin": 0.045,
+      "min_confidence": 0.2,
+      "min_crop_dimension": 14,
+      "min_chromatic_fraction": 0.015,
+      "max_pair_overlap_fraction": 0.45,
+      "max_seed_overlap_fraction": 0.08,
+      "max_exemplars_per_role": 24,
+      "min_track_support_samples": 3,
+      "neutral_saturation_ceiling": 60,
+      "min_consensus_similarity": 0.93,
+      "min_consensus_seed_similarity": 0.84,
+      "max_consensus_anchor_gap_seconds": 1.5,
+      "hue_weight": 0.12
+    },
+    "seed_intervals": [
+      {
+        "start_clip_seconds": 0.0,
+        "end_clip_seconds": 2.0,
+        "lead_id": 1,
+        "chase_id": 2
+      }
+    ],
+    "seed_origin": "user_reviewed",
+    "seed_observation_counts": {
+      "lead": 30,
+      "chase": 30
+    },
+    "exemplar_counts": {
+      "lead": 24,
+      "chase": 24
+    },
+    "maximum_cross_role_seed_similarity": 0.883953,
+    "sampled_frames": 555,
+    "automatic_frames": 525,
+    "automatic_lead_frames": 297,
+    "automatic_chase_frames": 182,
+    "automatic_paired_frames": 121,
+    "automatic_lead_unknown_frames": 228,
+    "automatic_chase_unknown_frames": 343,
+    "paired_frames": 151,
+    "frozen_local_consensus_banks": 11,
+    "consensus_proposals_before_merged_box_veto": 172,
+    "accepted_consensus_role_frames": 91,
+    "score_interpretation": "Histogram similarity, not a correctness probability.",
+    "validation_status": "Algorithmic identity hypotheses require visual review; similar liveries and changed lighting can remain unknown or mismatch.",
+    "exemplar_update_policy": "Global seed templates remain immutable. A single frozen bank of strongly supported within-view observations may validate current boxes; consensus matches never update either bank.",
+    "processing_seconds": 12.795
+  },
+  "per_view": {
+    "0": {
+      "sampled_frames": 111,
+      "paired_frames": 44,
+      "lead_frames": 87,
+      "chase_frames": 52
+    },
+    "1": {
+      "sampled_frames": 156,
+      "paired_frames": 25,
+      "lead_frames": 115,
+      "chase_frames": 32
+    },
+    "2": {
+      "sampled_frames": 105,
+      "paired_frames": 58,
+      "lead_frames": 76,
+      "chase_frames": 68
+    },
+    "3": {
+      "sampled_frames": 87,
+      "paired_frames": 20,
+      "lead_frames": 37,
+      "chase_frames": 41
+    },
+    "4": {
+      "sampled_frames": 36,
+      "paired_frames": 0,
+      "lead_frames": 0,
+      "chase_frames": 0
+    },
+    "5": {
+      "sampled_frames": 60,
+      "paired_frames": 4,
+      "lead_frames": 12,
+      "chase_frames": 19
+    }
+  },
+  "accepted_track_role_groups": [
+    {
+      "role": "lead",
+      "track_id": 1,
+      "accepted_samples": 87,
+      "start": 0.0,
+      "end": 7.333333
+    },
+    {
+      "role": "chase",
+      "track_id": 2,
+      "accepted_samples": 52,
+      "start": 0.0,
+      "end": 7.333333
+    },
+    {
+      "role": "lead",
+      "track_id": 10001,
+      "accepted_samples": 115,
+      "start": 7.4,
+      "end": 17.733333
+    },
+    {
+      "role": "chase",
+      "track_id": 10003,
+      "accepted_samples": 16,
+      "start": 7.8,
+      "end": 8.8
+    },
+    {
+      "role": "chase",
+      "track_id": 10010,
+      "accepted_samples": 16,
+      "start": 16.266667,
+      "end": 17.733333
+    },
+    {
+      "role": "lead",
+      "track_id": 20001,
+      "accepted_samples": 76,
+      "start": 17.8,
+      "end": 24.666667
+    },
+    {
+      "role": "chase",
+      "track_id": 20004,
+      "accepted_samples": 68,
+      "start": 18.066667,
+      "end": 24.733333
+    },
+    {
+      "role": "lead",
+      "track_id": 30006,
+      "accepted_samples": 37,
+      "start": 25.8,
+      "end": 30.533333
+    },
+    {
+      "role": "chase",
+      "track_id": 30005,
+      "accepted_samples": 41,
+      "start": 26.4,
+      "end": 30.266667
+    },
+    {
+      "role": "chase",
+      "track_id": 50001,
+      "accepted_samples": 19,
+      "start": 33.066667,
+      "end": 36.266667
+    },
+    {
+      "role": "lead",
+      "track_id": 50013,
+      "accepted_samples": 12,
+      "start": 35.333333,
+      "end": 36.733333
+    }
+  ],
+  "source_observation_association": "Every assigned role uses a track ID observed in that exact saved frame. Source boxes and detector confidence remain unchanged.",
+  "known_ambiguity_checks": {
+    "parked_50008_accepted": 0,
+    "occluded_wrong_role_50007_accepted": 0,
+    "exposure_view_40001_accepted": 0,
+    "exposure_view_40002_accepted": 0
+  },
+  "limitations": "No fully angle-independent identity guarantee. Exposure view30.6\u201333 remains unknown despite visible current boxes. Similar liveries, foreground obstruction and fragmented boxes can remain unknown or mismatch. No physical telemetry or expert identity accuracy is inferred.",
+  "consensus_crop_review": {
+    "samples": 91,
+    "reviewer": "AI assistant visual inspection, not human expert annotation",
+    "result": "All91 newly added role crops were inspected on four private contact pages and match the seeded physical car role. Several boxes include other overlapping bodywork; paired metrics remain withheld for the merged-box gate.",
+    "definition": "Current assignments accepted specifically through frozen local consensus; differs from the change compared with V1."
+  },
+  "new_assignment_crop_review": {
+    "definition": "Every newly assigned sampled frame and role pair compared with the previous test_continuity result, including strong descriptor matches and local consensus matches.",
+    "baseline_run": "test_continuity",
+    "current_run": "test_auto",
+    "sample_count": 112,
+    "lead_new_samples": 16,
+    "chase_new_samples": 96,
+    "lead_withheld_samples": 38,
+    "chase_withheld_samples": 1,
+    "changed_nonempty_role_ids": 0,
+    "reviewer": "AI assistant visual inspection; not human expert annotation",
+    "result": "All112 new frame and role source crops were visually inspected across five private contact pages by an AI assistant. The seeded physical car is visible in each crop. Several crops contain overlapping bodywork or foreground obstruction; this is not expert box or identity ground truth.",
+    "private_contact_pages": 5
+  },
+  "actual_browser_result": "Counts and visual comparison refer to the final test_auto result produced through the app workflow.",
+  "baseline_comparison": {
+    "lead_id": {
+      "newly_assigned": 16,
+      "newly_withheld": 38,
+      "changed_nonempty_id": 0
+    },
+    "chase_id": {
+      "newly_assigned": 96,
+      "newly_withheld": 1,
+      "changed_nonempty_id": 0
+    }
+  },
+  "automatic_seed_discovery": {
+    "uploaded_37s": {
+      "status": "pair_only",
+      "seed": null,
+      "pair_ids": [
+        1,
+        2
+      ],
+      "reason": "Dominant pair found; camera-compensated travel order is insufficient",
+      "evidence": {
+        "method": "dominant_pair_camera_compensated_order_v1",
+        "settings": {
+          "max_initial_seconds": 8.0,
+          "seed_seconds": 2.0,
+          "min_track_samples": 12,
+          "min_track_fraction": 0.35,
+          "min_joint_samples": 12,
+          "min_joint_fraction": 0.6,
+          "min_raw_motion_widths": 0.08,
+          "min_pair_dominance_margin": 0.15,
+          "min_seed_joint_fraction": 0.9,
+          "max_seed_overlap_fraction": 0.08,
+          "max_camera_windows": 8,
+          "max_decoded_frames": 16,
+          "camera_window_seconds": 1.0,
+          "camera_step_seconds": 0.5,
+          "min_background_inliers": 20,
+          "min_background_inlier_fraction": 0.55,
+          "min_motion_widths": 0.08,
+          "min_motion_cosine": 0.7,
+          "min_speed_ratio": 0.2,
+          "min_order_separation_widths": 0.07,
+          "max_order_overlap_fraction": 0.6,
+          "min_order_votes": 2,
+          "min_order_agreement": 1.0
+        },
+        "review_status": "automatic_geometry_unverified",
+        "score_note": "Gates are heuristic evidence, not calibrated identity probabilities.",
+        "scope": "Initial participant and travel-order proposal; perspective, camera motion, turns and similar participants can invalidate it.",
+        "participant_pair": {
+          "joint_samples": 86,
+          "initial_samples": 111,
+          "joint_fraction": 0.774775,
+          "competing_joint_fraction": 0.0,
+          "track_samples": {
+            "1": 111,
+            "2": 86
+          }
+        },
+        "motion_windows": [
+          {
+            "start_clip_seconds": 0.0,
+            "end_clip_seconds": 1.0,
+            "camera": {
+              "valid": true,
+              "background_inliers": 89,
+              "background_flow_points": 89,
+              "background_inlier_fraction": 1.0,
+              "scale": 1.000046,
+              "rotation_radians": -3e-06
+            },
+            "accepted": false,
+            "reason": "Participants stationary relative to background",
+            "motion_widths": [
+              0.0009285843717080737,
+              0.0003347775984291706
+            ]
+          },
+          {
+            "start_clip_seconds": 0.533333,
+            "end_clip_seconds": 1.466667,
+            "camera": {
+              "valid": false,
+              "reason": "Weak or excessive camera motion fit",
+              "background_inliers": 14,
+              "background_flow_points": 25,
+              "background_inlier_fraction": 0.56,
+              "scale": 0.970111,
+              "rotation_radians": 0.012962
+            },
+            "accepted": false,
+            "reason": "Weak or excessive camera motion fit"
+          },
+          {
+            "start_clip_seconds": 1.0,
+            "end_clip_seconds": 2.0,
+            "camera": {
+              "valid": false,
+              "reason": "Insufficient consistent background flow"
+            },
+            "accepted": false,
+            "reason": "Insufficient consistent background flow"
+          },
+          {
+            "start_clip_seconds": 1.466667,
+            "end_clip_seconds": 2.466667,
+            "camera": {
+              "valid": false,
+              "reason": "Weak or excessive camera motion fit",
+              "background_inliers": 10,
+              "background_flow_points": 31,
+              "background_inlier_fraction": 0.322581,
+              "scale": 0.922012,
+              "rotation_radians": 0.170557
+            },
+            "accepted": false,
+            "reason": "Weak or excessive camera motion fit"
+          },
+          {
+            "start_clip_seconds": 2.0,
+            "end_clip_seconds": 3.0,
+            "camera": {
+              "valid": true,
+              "background_inliers": 41,
+              "background_flow_points": 69,
+              "background_inlier_fraction": 0.594203,
+              "scale": 0.935501,
+              "rotation_radians": -0.008029
+            },
+            "accepted": true,
+            "lead_id": 1,
+            "chase_id": 2,
+            "motion_cosine": 0.801465,
+            "motion_widths": [
+              0.394099,
+              0.875987
+            ],
+            "order_separation_widths": [
+              0.753598,
+              0.440132
+            ]
+          },
+          {
+            "start_clip_seconds": 2.466667,
+            "end_clip_seconds": 3.466667,
+            "camera": {
+              "valid": true,
+              "background_inliers": 42,
+              "background_flow_points": 62,
+              "background_inlier_fraction": 0.677419,
+              "scale": 0.94597,
+              "rotation_radians": -0.014759
+            },
+            "accepted": false,
+            "reason": "Overlapping boxes undermine travel order"
+          },
+          {
+            "start_clip_seconds": 3.0,
+            "end_clip_seconds": 3.933333,
+            "camera": {
+              "valid": false,
+              "reason": "Weak or excessive camera motion fit",
+              "background_inliers": 8,
+              "background_flow_points": 23,
+              "background_inlier_fraction": 0.347826,
+              "scale": 0.993386,
+              "rotation_radians": 0.013547
+            },
+            "accepted": false,
+            "reason": "Weak or excessive camera motion fit"
+          },
+          {
+            "start_clip_seconds": 3.466667,
+            "end_clip_seconds": 4.466667,
+            "camera": {
+              "valid": false,
+              "reason": "Weak or excessive camera motion fit",
+              "background_inliers": 13,
+              "background_flow_points": 35,
+              "background_inlier_fraction": 0.371429,
+              "scale": 0.909332,
+              "rotation_radians": -0.02804
+            },
+            "accepted": false,
+            "reason": "Weak or excessive camera motion fit"
+          }
+        ],
+        "decoded_frames": 10
+      },
+      "measured_seconds": 3.872,
+      "scope": "Private upload tuning/regression example; geometry roles are automatic unverified hypotheses.",
+      "visual_inspection": "Assistant checked source contact sheet: dark Mustang ID1 leads white Supra ID2 in this first view. No expert labels or generic accuracy."
+    },
+    "fresh_4s_upload": {
+      "status": "pair_only",
+      "seed": null,
+      "pair_ids": [
+        1,
+        2
+      ],
+      "reason": "Dominant pair found; camera-compensated travel order is insufficient",
+      "evidence": {
+        "method": "dominant_pair_camera_compensated_order_v1",
+        "settings": {
+          "max_initial_seconds": 8,
+          "seed_seconds": 2,
+          "min_track_samples": 12,
+          "min_track_fraction": 0.35,
+          "min_joint_samples": 12,
+          "min_joint_fraction": 0.6,
+          "min_raw_motion_widths": 0.08,
+          "min_pair_dominance_margin": 0.15,
+          "min_seed_joint_fraction": 0.9,
+          "max_seed_overlap_fraction": 0.08,
+          "max_camera_windows": 8,
+          "max_decoded_frames": 16,
+          "camera_window_seconds": 1,
+          "camera_step_seconds": 0.5,
+          "min_background_inliers": 20,
+          "min_background_inlier_fraction": 0.55,
+          "min_motion_widths": 0.08,
+          "min_motion_cosine": 0.7,
+          "min_speed_ratio": 0.2,
+          "min_order_separation_widths": 0.07,
+          "max_order_overlap_fraction": 0.6,
+          "min_order_votes": 2,
+          "min_order_agreement": 1
+        },
+        "review_status": "automatic_geometry_unverified",
+        "score_note": "Gates are heuristic evidence, not calibrated identity probabilities.",
+        "scope": "Initial participant and travel-order proposal; perspective, camera motion, turns and similar participants can invalidate it.",
+        "participant_pair": {
+          "joint_samples": 17,
+          "initial_samples": 17,
+          "joint_fraction": 1,
+          "competing_joint_fraction": 0,
+          "track_samples": {
+            "1": 17,
+            "2": 17
+          }
+        },
+        "motion_windows": [
+          {
+            "start_clip_seconds": 0,
+            "end_clip_seconds": 1,
+            "camera": {
+              "valid": false,
+              "reason": "Insufficient consistent background flow"
+            },
+            "accepted": false,
+            "reason": "Insufficient consistent background flow"
+          },
+          {
+            "start_clip_seconds": 0.5,
+            "end_clip_seconds": 1.5,
+            "camera": {
+              "valid": false,
+              "reason": "Weak or excessive camera motion fit",
+              "background_inliers": 10,
+              "background_flow_points": 37,
+              "background_inlier_fraction": 0.27027,
+              "scale": 0.994418,
+              "rotation_radians": 0.094462
+            },
+            "accepted": false,
+            "reason": "Weak or excessive camera motion fit"
+          }
+        ],
+        "decoded_frames": 4
+      }
+    },
+    "real_clip_result": "Both checks discovered the two candidate participants but withheld starting roles because camera compensated travel order was unclear. Existing saved reviewed seed was reused for the37s replay.",
+    "scope": "Positive fully automatic seed-order cases have semantic tests; these real clips do not establish independent automatic role-order accuracy."
+  },
+  "final_workflow_validation": {
+    "passed_tests": 183,
+    "passed_subtests": 80,
+    "browser": {
+      "run_id": "test_auto",
+      "actual_browser_one_click": true,
+      "reused_existing_seed": true,
+      "url_selector_reload_agree": true,
+      "cached_camera_repair": true,
+      "paired_frames": 151,
+      "frame_count": 555,
+      "camera_views": 6,
+      "role_match_download_equal": true,
+      "report_download_equal": true,
+      "playback": {
+        "time": 1.071821,
+        "duration": 37,
+        "error": null
+      },
+      "browser_errors": []
+    },
+    "fresh_browser_upload": {
+      "actual_browser_upload": true,
+      "run_id": "automatic_upload_4s",
+      "status": "complete",
+      "sampled_frames": 40,
+      "detected_camera_views": 2,
+      "processing_seconds": 43.641,
+      "playback": {
+        "time": 1.24916,
+        "duration": 4,
+        "error": null
+      },
+      "browser_errors": []
+    },
+    "fresh_upload_ambiguous_roles_withheld": true,
+    "all_assignments_have_current_observed_box": true,
+    "original_test_export_hashes_preserved": true,
+    "decoded_replay": {
+      "frames": 555,
+      "fps": 15.0,
+      "seconds": 37.0
+    },
+    "project_README_files_checked": 2,
+    "README_dash_check": "passed",
+    "original_pretrained_model_sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+    "new_training_or_model_download": false,
+    "private_media_published": false
+  }
+}

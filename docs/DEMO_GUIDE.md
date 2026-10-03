@@ -74,3 +74,9 @@ Paste ready post text:
 > #ComputerVision #Python #MachineLearning #PortfolioProject
 
 Only describe your own footage as tested once you have processed and inspected it. The saved 71.3 percent demo and 61.8 percent first uploaded test are reviewed pair availability on selected examples, not generic accuracy figures. Do not present either as a model accuracy score in a post.
+
+## One click automatic tandem workflow
+
+Open the saved result named test_auto for the repaired user recording. The URL, selector and visible Saved result label identify the same replay. On another existing result, click Automatically find and follow tandem. A saved starting pair is reused automatically and older camera tracking is repaired separately. Keep Automatically identify and follow tandem enabled on a new upload. If the app can only propose the participant pair, confirm lead and chase once in a clear seed interval. Do not repeat initial IDs across manual camera intervals: IDs are local, and the bounded editor lists IDs observed in each interval when an assignment is invalid.
+
+The tuning recording now has 151 accepted paired samples out of 555, or 27.2 percent. MATCH labels are automatic hypotheses. The view from 30.6 to 33 seconds still remains unknown, so a demo should show both accepted measurements and the documented limits. Recognition from every camera position is not established. Source footage, replay frames and screenshots remain private unless publication permission is available.

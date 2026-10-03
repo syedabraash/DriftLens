@@ -521,7 +521,7 @@ def render_run(run_dir: Path, summary: dict, observations: list[dict], frames: l
                 text = f"{role}  ID {identifier}  {float(row['confidence']):.2f}"
                 continuation = summary.get("role_continuation") or {}
                 is_seed = any(float(seed["start_clip_seconds"]) <= float(frame_record["clip_time"]) < float(seed["end_clip_seconds"]) for seed in continuation.get("seed_intervals", []))
-                if continuation.get("active") and (lead or chase) and not is_seed:
+                if continuation.get("active") and (lead or chase) and (not is_seed or continuation.get("seed_origin") == "automatic_motion"):
                     text += "  MATCH"
                 if row.get("detection_method") == "temporal_appearance_class_recovery":
                     text += f"  R class {row['source_class_id']}"

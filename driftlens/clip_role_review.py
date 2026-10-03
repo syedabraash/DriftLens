@@ -93,10 +93,12 @@ def _validated_inputs(summary: dict, frames: list[dict], observations: list[dict
             raise ValueError("Role intervals must end inside the clip duration.")
         roles = [identity for identity in (interval["lead_id"], interval["chase_id"]) if identity is not None]
         if roles and any(start < cut < end for cut in cuts):
-            raise ValueError("Split assigned role intervals at each camera cut. IDs and roles stay local to one view.")
+            raise ValueError("Split assigned role intervals at each camera cut. IDs and roles stay local to one view. Use Follow lead and chase across views to continue a reviewed pair automatically.")
         for identity in roles:
             if not any(observed_id == identity and start <= time < end for observed_id, time in visible):
-                raise ValueError(f"Track ID {identity} was not observed within interval {start:.3f}s to {end:.3f}s.")
+                interval_ids = sorted({observed_id for observed_id, time in visible if start <= time < end})
+                available_here = ", ".join(map(str, interval_ids)) or "none"
+                raise ValueError(f"Track ID {identity} was not observed within interval {start:.3f}s to {end:.3f}s. Observed IDs in this interval: {available_here}. Select a visible ID for this interval, or use Follow lead and chase across views to continue your reviewed pair automatically.")
     return canonical
 
 
@@ -135,9 +137,12 @@ def _publish_clip_role_intervals(run_dir: Path, intervals: list[dict], *, contin
             if tuple(_id(decision.get(key)) for key in ("lead_id", "chase_id")) != expected:
                 raise ValueError("Role match evidence disagrees with the published interval map.")
         revised.update(role_review_status="automatic_appearance_unverified",
-                       role_assignment_method="User reviewed the seed pair; later role IDs are automatic appearance hypotheses without expert validation.",
+                       role_assignment_method=("The initial pair and role order were automatically proposed from observed motion; later roles use appearance hypotheses without expert validation." if continuation.get("seed_origin") == "automatic_motion" else "User reviewed the seed pair; later role IDs are automatic appearance hypotheses without expert validation."),
                        role_continuation=continuation)
         revised["files"]["role_matches"] = "role_matches.json"
+        revised.pop("automatic_tandem", None)
+        if continuation.get("automatic_seed_proposal"):
+            revised["automatic_tandem"] = continuation["automatic_seed_proposal"]
     elif revised.get("role_continuation"):
         revised["role_continuation"] = {**revised["role_continuation"], "active": False, "override": "User saved manual role intervals."}
     stage = (run_dir / f".clip_roles_{uuid.uuid4().hex}").resolve()
@@ -212,6 +217,7 @@ def render_clip_role_editor(run_dir: Path, summary: dict, observations) -> None:
             if str(previous.get("shot_index", 0)) != str(row.get("shot_index", 0))]
     with st.expander("Correct roles within bounded clip intervals", expanded=False):
         st.caption("Use visual livery and travel order to select lead and chase. Tracker numbers alone do not establish roles or associate cars across cuts.")
+        st.caption("Track IDs can change after a camera cut. Do not repeat the first view's IDs through the whole clip. Follow lead and chase across views can match a reviewed pair automatically; use this editor for corrections.")
         st.caption(f"Clip duration {duration:.3f}s. Available observed IDs: {', '.join(map(str, ids)) or 'none'}. Start is included and end is excluded. Each assigned ID must occur inside its interval; uncovered time stays unknown.")
         if cuts:
             st.caption("Detected camera cuts within clip: " + ", ".join(f"{time:.3f}s" for time in cuts) + ". Split assigned intervals at these boundaries and review roles independently.")

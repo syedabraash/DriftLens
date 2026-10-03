@@ -8,10 +8,12 @@ from .clip_role_review import _publish_clip_role_intervals, _validated_inputs
 from .review import read_rows
 
 
-def follow_clip_roles(run_dir: Path, seed: dict) -> dict:
+def follow_clip_roles(run_dir: Path, seed: dict, *, seed_origin: str = 'user_reviewed', automatic_proposal: dict | None = None) -> dict:
     """Use an explicit reviewed interval; publish matches and exports together."""
     from .role_identity import suggest_role_intervals
 
+    if seed_origin not in {'user_reviewed', 'automatic_motion'}:
+        raise ValueError('Unknown seed origin.')
     run_dir = Path(run_dir).resolve()
     summary = json.loads((run_dir / "summary.json").read_text(encoding="utf-8-sig"))
     frames = read_rows(run_dir / "frames.csv")
@@ -20,12 +22,14 @@ def follow_clip_roles(run_dir: Path, seed: dict) -> dict:
     if seeds[0]["lead_id"] is None or seeds[0]["chase_id"] is None:
         raise ValueError("Choose two different observed seed IDs after checking lead and chase.")
     result = suggest_role_intervals(Path(summary["source_path"]), frames, observations, seeds,
-                                   float(summary["duration_seconds"]))
+                                   float(summary["duration_seconds"]), seed_origin=seed_origin)
     continuation = {**result["summary"], "active": True, "seed_intervals": seeds,
-                    "method": "reviewed_seed_appearance_role_continuation_v1",
+                    "method": "observed_seed_appearance_role_continuation_v2", "seed_origin": seed_origin,
                     "review_status": "automatic_appearance_unverified",
                     "score_note": "Appearance similarity and margins are heuristic scores, not calibrated identity probabilities.",
                     "scope": "Only current observed boxes may receive roles. Uncertain, missing or merged candidates remain unassigned; no hidden positions or expert labels are created."}
+    if automatic_proposal is not None:
+        continuation["automatic_seed_proposal"] = automatic_proposal
     return _publish_clip_role_intervals(run_dir, result["intervals"],
                                        continuation=continuation, decisions=result["decisions"])
 
@@ -41,7 +45,8 @@ def render_role_continuity(run_dir: Path, summary: dict) -> None:
         return
     cuts = [float(current["clip_time"]) for previous, current in zip(frames, frames[1:])
             if int(previous.get("shot_index", 0)) != int(current.get("shot_index", 0))]
-    saved_seeds = (summary.get("role_continuation") or {}).get("seed_intervals", [])
+    saved_continuation = summary.get("role_continuation") or {}
+    saved_seeds = saved_continuation.get("seed_intervals", []) if saved_continuation.get("active") and summary.get("role_review_status") != "user_assignment_unverified" else []
     first = next((row for row in saved_seeds or summary.get("role_intervals", [])
                   if row.get("lead_id") is not None and row.get("chase_id") is not None), {})
     seed_start = float(first.get("start_clip_seconds", 0))

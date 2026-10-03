@@ -193,6 +193,67 @@ class IdentityAssociationTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             IdentitySettings(min_similarity=float('nan'))
 
+    def test_automatic_seed_is_never_reported_as_user_review(self):
+        with tempfile.TemporaryDirectory() as directory:
+            args = fixture(directory)
+            result = suggest_role_intervals(*args, seed_origin='automatic_motion')
+            self.assertEqual(result['decisions'][0]['assignment_kind'], 'automatic_seed')
+            self.assertEqual(result['summary']['seed_origin'], 'automatic_motion')
+            self.assertIn('unverified hypothesis', result['intervals'][0]['review_basis'])
+            self.assertFalse(any(row['assignment_kind'] == 'user_seed' for row in result['decisions']))
+
+    def test_invalid_seed_origin_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(ValueError, 'Seed origin'):
+                suggest_role_intervals(*fixture(directory), seed_origin='expert_reviewed')
+
+    def test_hue_evidence_is_downweighted_when_neutral_crop_has_few_coloured_pixels(self):
+        plain = np.full((70, 90, 3), 230, np.uint8)
+        score = appearance_similarity(describe_crop(plain), describe_crop(plain))
+        self.assertAlmostEqual(score, 1)
+
+    def consensus_fixture(self, directory, count=8):
+        args = fixture(directory, [{} for _ in range(count)])
+        def feature(values):
+            masses = np.zeros(15)
+            for index, mass in values.items():
+                masses[index] = mass
+            chromatic = float(masses[:12].sum())
+            return {'masses': masses, 'hues': masses[:12] / chromatic,
+                    'chromatic_fraction': chromatic}
+        seed = feature({6: .3, 11: .2, 12: .4, 13: .1})
+        anchor = feature({6: .3, 11: .2, 12: .2, 13: .2, 14: .1})
+        weak = feature({6: .25, 11: .2, 12: .1, 13: .25, 14: .2})
+        chase = feature({1: .3, 12: .1, 13: .1, 14: .5})
+        features = {}
+        for row in args[2]:
+            index = row['frame_index']
+            identity = row['track_id']
+            features[(index, identity)] = (chase if identity in (2, 10002) else
+                                           seed if index < 3 else anchor if index < 6 else weak)
+        return args, features
+
+    def test_multiple_strong_hits_can_support_a_weaker_current_crop(self):
+        with tempfile.TemporaryDirectory() as directory:
+            args, features = self.consensus_fixture(directory)
+            with patch('driftlens.role_identity._read_features', return_value=features):
+                result = suggest_role_intervals(*args)
+            decision = result['decisions'][6]
+            self.assertEqual(decision['lead_id'], 10001)
+            self.assertLess(decision['lead_similarity'], .9)
+            self.assertGreater(decision['lead_consensus_similarity'], .93)
+            self.assertEqual(decision['lead_reason'], 'appearance_and_frozen_local_track_consensus')
+
+    def test_consensus_cannot_recursively_extend_its_own_support_bank(self):
+        with tempfile.TemporaryDirectory() as directory:
+            args, features = self.consensus_fixture(directory, 32)
+            with patch('driftlens.role_identity._read_features', return_value=features):
+                result = suggest_role_intervals(*args)
+            self.assertEqual(result['decisions'][6]['lead_id'], 10001)
+            self.assertEqual(result['decisions'][20]['lead_id'], 10001)
+            self.assertIsNone(result['decisions'][21]['lead_id'])
+            self.assertIsNone(result['decisions'][-1]['lead_id'])
+
 
 if __name__ == '__main__':
     unittest.main()

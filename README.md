@@ -1,6 +1,6 @@
 # DriftLens
 
-DriftLens V1 is a local computer vision tool for review assisted analysis of tandem drifting footage. Upload a private video, process a short interval and review one reliable lead and chase pair. Appearance based role continuity can propose later identities after camera changes or tracker fragmentation. Inspect the automatic matches and unknown spans before reading the image separation chart. The dashboard also opens with a prepared complete run from launch through the visible finish across four camera views.
+DriftLens is a local computer vision tool for review assisted analysis of tandem drifting footage. Upload a private video and process a short interval. The automatic tandem step searches for participating cars and clear travel order, or reuses a previously saved starting pair, then proposes identities across camera changes and tracker fragmentation. Inspect MATCH labels and unknown spans before reading the image separation chart. When starting roles are unclear, confirm one reliable pair once. The dashboard also has a prepared complete local run from launch through the visible finish across four camera views.
 
 The project lives separately from PitWall and the banking project. It uses a dedicated Python environment and stores its own inputs and outputs.
 
@@ -35,7 +35,7 @@ Normal analysis runs locally after setup. The numerical reports describe the sav
 
 The downloaded source is `longbeach2024_action.mp4`. The prepared run covers source time 31:44.5 through 32:11.2, lasting 26.7 seconds. Its replay contains 268 sampled frames at ten frames per second and lasts 26.8 seconds because individual camera shots end between sampled frames. The timeline preserves both source time and replay time. Player jumps use whole seconds and may include less than one second before the selected shot.
 
-The Shot review tab retains the twelve original diagnostic clips and your own results. Your result includes a replay, a readable report and numerical exports. Confirm lead and chase roles to enable tandem separation measurements.
+The Shot review tab retains the twelve original diagnostic clips and your own results. Your result includes a replay, a readable report and numerical exports. Inspect automatic lead and chase proposals or confirm a starting pair when needed to enable tandem separation measurements.
 
 ## Test your own video
 
@@ -44,10 +44,10 @@ The Shot review tab retains the twelve original diagnostic clips and your own re
 3. Begin with ten to fifteen seconds of one continuous camera view showing both participants. Set Start seconds and End seconds within the video. Each interval must be longer than zero and no longer than 60 seconds.
 4. Keep the selected analysis profile for the first comparison and enter a new Result name such as `my_first_test`.
 5. Choose Process clip locally and keep the terminal open until processing finishes.
-6. Open the result in Shot review. Check boxes, local tracker IDs, missing observations and the readable report against the visible cars.
-7. Watch a clear initial interval and confirm which observed ID is lead and which is chase using livery and travel order.
-8. Open Follow lead and chase across views. Set Seed start seconds, Seed end seconds, Seed lead ID and Seed chase ID. Confirm I have checked lead and chase in the seed interval, then choose Follow this pair through the clip. No prior manual interval save is required.
-9. Inspect the resulting replay, image separation chart and downloadable report. Later automatic assignments are marked MATCH and remain unverified. Correct unsuitable matches in Correct roles within bounded clip intervals or seed another reliable interval when needed. Manual changes override the assignments, retain the diagnostics and deactivate continuity status.
+6. Keep Automatically identify and follow tandem enabled to attempt participant and role matching after detection. Open the saved result in Shot review and inspect boxes, MATCH labels and the readable report against the visible cars.
+7. For an existing result, choose Automatically find and follow tandem. The app reuses a saved starting pair and repairs older cached camera tracking in a separate result when needed. Later local IDs are selected automatically; repeating the initial IDs in every interval is unnecessary.
+8. If the starting travel order is unclear, open Follow lead and chase across views. Set one clear Seed start seconds and Seed end seconds interval, choose Seed lead ID and Seed chase ID, confirm I have checked lead and chase in the seed interval and choose Follow this pair through the clip.
+9. Inspect the replay, image separation chart and downloadable report. Automatic proposals remain unverified and can be wrong. Correct unsuitable matches in Correct roles within bounded clip intervals using IDs observed in that interval. Manual corrections override assignments while retaining inactive diagnostics.
 
 Uploads stay under `data/uploads` and results under `outputs/runs`. The analysis uses your CPU. A recorded 28 second test took about ten minutes before replay export and review, so process first and record the finished dashboard afterward. The sampling rate describes selected video frames and is different from processing speed.
 
@@ -73,7 +73,7 @@ The [Ultralytics tracking documentation](https://docs.ultralytics.com/modes/trac
 
 Screen separation is the distance between bounding box centres divided by their mean width. Camera position, zoom, perspective, and changing box sizes affect the value. It describes the image rather than physical distance.
 
-A missing observation or unknown role creates a gap in the chart. Tracker IDs remain local observations. The prepared historical examples use roles visually reviewed by the AI assistant without human expert validation. The newer continuity feature starts from a reviewer supplied pair and compares observed car appearance after cuts or local ID changes. Later proposed labels display MATCH; match scores and margins describe heuristic evidence rather than identity probability. A match must pass similarity and competing match checks; uncertain cases remain unknown. These automatic proposals can be wrong when appearance changes, liveries are similar, cars overlap or the view is unfamiliar. Role changes and camera cuts still break chart lines, and no position is carried across hidden frames.
+A missing observation or unknown role creates a gap in the chart. Tracker IDs remain local observations. The prepared historical examples use roles visually reviewed by the AI assistant without human expert validation. The newer continuity feature starts from a reviewer supplied pair or a conservative automatic motion proposal and compares observed car appearance after cuts or local ID changes. Automatic starting roles are recorded separately from user reviewed seeds. Camera motion, overlap or weak background evidence can prevent automatic starting roles; confirm one pair when prompted. Later proposed labels display MATCH; match scores and margins describe heuristic evidence rather than identity probability. A match must pass similarity and competing match checks; uncertain cases remain unknown. Fixed local track appearance banks can support a current observed crop near several strong seed matches. They do not fill missing positions or update the global seed from automatic matches. These automatic proposals can be wrong when appearance changes, liveries are similar, cars overlap or the view is unfamiliar. Role changes and camera cuts still break chart lines, and no position is carried across hidden frames.
 
 Unassigned candidates can include background vehicles and false detections. Tandem separation uses only the reviewed participant roles with accepted current observations. A visible candidate label is different from a confirmed participating car.
 

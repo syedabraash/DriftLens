@@ -76,3 +76,10 @@ Every project README must contain no dash characters. Validate that rule when cr
 The continuity feature is a bounded heuristic built from observed crop appearance, not a new trained reidentification network. Similarity and ambiguity gates reduce unsupported assignments but cannot eliminate appearance mistakes or participant swaps. New view decisions remain inspectable and editable, and unknown or missing observations do not contribute to tandem separation.
 
 The user's uploaded `test` clip exposed the camera and identity issue and now guides the implementation. It is a regression and tuning example, not an untouched independent evaluation. Historical complete demo results, sparse labels and unsuccessful training evidence remain frozen. No new expert review or broader event accuracy is established by adding this feature.
+
+
+## Automatic tandem workflow
+
+The current workflow attempts participant discovery and camera compensated travel order after a private upload, with explicit automatic seed provenance. If motion or order is ambiguous it proposes only the pair and asks for one reviewed starting assignment. A saved reviewed seed can be reused in one action. Later roles are matched to current observed boxes across camera views and fragmented IDs. Strong seed matches support fixed local track appearance banks, with bounded temporal, geometry, crop and competing candidate checks; global seed exemplars remain unchanged. Missing detections and ambiguous assignments stay unknown.
+
+The URL and tracking selector identify the same saved result. Older cached camera tracking is repaired in a sibling result, preserving original evidence. The manual editor reports IDs that actually occur in each interval and does not repeat initial IDs across camera views. This improves the automatic workflow without establishing recognition from every camera angle, through arbitrary smoke or across all events.

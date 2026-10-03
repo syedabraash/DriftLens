@@ -319,7 +319,8 @@ def build_run_analysis(summary: dict, timeline_rows: Iterable[dict] | Any,
     continuation = summary.get("role_continuation") or {}
     if continuation.get("active"):
         report["role_continuation"] = continuation
-        note = "The seed pair was reviewed by the user; later roles are unverified appearance matches. Similarity scores and margins are not calibrated identity probabilities. Ambiguous matches remain unknown and manual corrections override the automatic map."
+        seed_note = ("The initial pair and role order were automatically proposed from camera compensated motion" if continuation.get("seed_origin") == "automatic_motion" else "The seed pair was reviewed by the user")
+        note = seed_note + "; later roles are unverified appearance matches. Similarity scores and margins are not calibrated identity probabilities. Ambiguous matches remain unknown and manual corrections override the automatic map."
         report["conclusions"].append(note)
         report["limitations"].append(note)
     if summary.get("recover_vehicle_classes") or (summary.get("inference_profile") or {}).get("recover_vehicle_classes"):

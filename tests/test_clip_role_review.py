@@ -57,6 +57,19 @@ def renderer(destination, summary, observations, frames):
 
 
 class ClipIntervalTests(unittest.TestCase):
+    def test_repeated_first_view_ids_error_names_current_interval_ids_and_matching_action(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            fixture(root, with_cut=True)
+            originals = {path.name: path.read_bytes() for path in root.iterdir() if path.is_file()}
+            with patch("driftlens.pipeline.render_run") as render:
+                with self.assertRaises(ValueError) as raised:
+                    update_clip_role_intervals(root, [interval(.3, .6, 1, 2)])
+                self.assertIn("Observed IDs in this interval: 10001, 10002", str(raised.exception))
+                self.assertIn("Follow lead and chase across views", str(raised.exception))
+                render.assert_not_called()
+            self.assertEqual(originals, {path.name: path.read_bytes() for path in root.iterdir() if path.is_file()})
+
     def test_fragmented_track_intervals_preserve_missing_samples_and_rebuild_all_exports(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

@@ -167,6 +167,48 @@ def short_time(value: Any) -> str:
     return f"{int(seconds // 60):02d}:{seconds % 60:04.1f}"
 
 
+def queue_review_run(run_dir: Path) -> None:
+    """Open a saved result without changing an already rendered widget value."""
+    st.session_state["pending_selected_run"] = str(run_dir)
+    st.query_params["run"] = run_dir.name
+
+
+def sync_requested_review_run(runs: list[tuple[Path, dict]]) -> str | None:
+    """Keep a valid deep link and a queued internal result in agreement."""
+    paths = {str(folder): folder for folder, _ in runs}
+    requested = st.query_params.get("run")
+    pending = st.session_state.get("pending_selected_run")
+    # A just completed analysis or catalogue click is an explicit newer choice.
+    linked = pending if pending in paths else next(
+        (str(folder) for folder, _ in runs if folder.name == requested), None)
+    if linked is not None:
+        st.session_state["pending_selected_run"] = linked
+        if requested != paths[linked].name:
+            st.query_params["run"] = paths[linked].name
+    return linked
+
+
+def selected_review_run_changed(options: list[str]) -> None:
+    """A dropdown choice updates the address before the next app rerun."""
+    selected = st.session_state.get("selected_run")
+    if selected in options:
+        st.query_params["run"] = Path(selected).name
+
+
+def select_review_run(run_map: dict[str, tuple[Path, dict]]) -> str:
+    pending = st.session_state.pop("pending_selected_run", None)
+    if pending in run_map:
+        st.session_state["selected_run"] = pending
+    options = list(run_map)
+    if st.session_state.get("selected_run") not in run_map:
+        st.session_state["selected_run"] = options[0]
+    selected = st.selectbox("Tracking result", options, key="selected_run",
+                            on_change=selected_review_run_changed, args=(options,),
+                            format_func=lambda value: f"{run_map[value][1].get('clip_id', Path(value).name)} · {run_map[value][1].get('tracker', 'tracker')} · {number(run_map[value][1].get('duration_seconds')):.1f}s")
+    st.caption(f"Saved result: {Path(selected).name}")
+    return selected
+
+
 def render_catalog(catalog: dict, runs: list[tuple[Path, dict]]) -> None:
     clips = catalog.get("clips", [])
     if not clips:
@@ -188,7 +230,7 @@ def render_catalog(catalog: dict, runs: list[tuple[Path, dict]]) -> None:
                 clip_id = str(clip.get("id", ""))
                 if clip_id in ready:
                     if st.button("Open tracking result", key=f"open_{clip_id}", width="stretch"):
-                        st.session_state["selected_run"] = str(ready[clip_id])
+                        queue_review_run(ready[clip_id])
                         st.rerun()
                 else:
                     st.caption("Ready for processing")
@@ -253,10 +295,12 @@ def render_charts(metrics: pd.DataFrame) -> None:
 
 
 def render_roles(run_dir: Path, summary: dict, observations: pd.DataFrame) -> None:
-    from driftlens.clip_role_review import render_clip_role_editor
-    render_clip_role_editor(run_dir, summary, observations)
+    from driftlens.automatic_roles import render_automatic_roles
+    render_automatic_roles(run_dir, summary)
     from driftlens.role_continuity import render_role_continuity
     render_role_continuity(run_dir, summary)
+    from driftlens.clip_role_review import render_clip_role_editor
+    render_clip_role_editor(run_dir, summary, observations)
 
 
 def render_review(runs: list[tuple[Path, dict]]) -> tuple[Path, dict] | None:
@@ -265,14 +309,7 @@ def render_review(runs: list[tuple[Path, dict]]) -> tuple[Path, dict] | None:
         st.info("Open Process a clip, choose a continuous shot, and run the tracker. The numbered replay will appear here.")
         return None
     run_map = {str(path): (path, summary) for path, summary in runs}
-    pending = st.session_state.pop("pending_selected_run", None)
-    if pending in run_map:
-        st.session_state["selected_run"] = pending
-    options = list(run_map)
-    if st.session_state.get("selected_run") not in run_map:
-        st.session_state["selected_run"] = options[0]
-    selected = st.selectbox("Tracking result", options, key="selected_run",
-                            format_func=lambda value: f"{run_map[value][1].get('clip_id', Path(value).name)} · {run_map[value][1].get('tracker', 'tracker')} · {number(run_map[value][1].get('duration_seconds')):.1f}s")
+    selected = select_review_run(run_map)
     run_dir, summary = run_map[selected]
     observation_file = run_file(run_dir, summary, "observations", "observations.csv")
     metrics_file = run_file(run_dir, summary, "metrics", "frame_metrics.csv")
@@ -305,12 +342,13 @@ def render_review(runs: list[tuple[Path, dict]]) -> tuple[Path, dict] | None:
             st.warning("The annotated video is missing from this result.")
         render_roles(run_dir, summary, observations)
         if summary.get("role_review_status") == "automatic_appearance_unverified":
-            st.caption("The seed pair was reviewed by the user. Later roles are automatic appearance matches, marked MATCH in the replay, and need visual review. Uncertain matches stay unassigned.")
+            initial = ("The initial pair and role order were automatically proposed." if (summary.get("role_continuation") or {}).get("seed_origin") == "automatic_motion" else "The seed pair was reviewed by the user.")
+            st.caption(initial + " Later roles are automatic appearance matches, marked MATCH in the replay, and need visual review. Uncertain matches stay unassigned.")
         elif summary.get("role_review_status") == "user_assignment_unverified":
             st.caption("These roles are your saved visual assignments and have no human expert validation.")
         elif summary.get("role_assignment_method"):
             st.caption("Initial roles were visually reviewed by the AI assistant without human expert validation. Check the participating cars during playback.")
-        st.caption("Unassigned candidates can include background vehicles or false detections. Only the reviewed lead and chase are used for pair measurements. Detector confidence is not identity confidence; smoke and overlap can cause missing observations or new IDs.")
+        st.caption("Unassigned candidates can include background vehicles or false detections. Only assigned participant roles with accepted current observations are used for pair measurements. Detector confidence is not identity confidence; smoke and overlap can cause missing observations or new IDs.")
         if summary.get("recover_vehicle_classes"):
             st.caption("R marks a current box recovered by matching a recent vehicle's appearance. Its confidence belongs to the original predicted class, recorded in the observations CSV; it is not a car or identity probability.")
     with right:
@@ -318,7 +356,7 @@ def render_review(runs: list[tuple[Path, dict]]) -> tuple[Path, dict] | None:
             render_charts(metrics)
         else:
             st.subheader("Identify the tandem pair")
-            st.info("Cars begin with numbered IDs. Review the replay, then use the bounded role editor beside it to generate pair measurements.")
+            st.info("Use Automatically find and follow tandem beside the replay. If travel order is unclear, confirm one starting lead and chase pair in the seed controls.")
         with st.expander("Tracked IDs and confidence"):
             if {"track_id", "confidence"}.issubset(observations.columns) and not observations.empty:
                 table = observations.groupby("track_id").agg(observations=("confidence", "size"), mean_confidence=("confidence", "mean")).reset_index()
@@ -401,6 +439,7 @@ def render_process(catalog: dict, sources: list[Path]) -> None:
         target_fps = second.selectbox("Sample frames per second", [5, 10, 15], index=1)
         name_default = str(preset.get("id", f"upload_{source.stem[:10]}" if upload_record else "custom_shot"))
         run_name = third.text_input("Result name", value=name_default, key=f"name_{preset_id}")
+        automatic_roles = st.checkbox("Automatically identify and follow tandem", value=True)
         replace = st.checkbox("Replace an existing result with this name and tracker")
         submitted = st.form_submit_button("Process clip locally", type="primary", width="stretch")
     st.caption("Start with 5 to 15 seconds on this computer. The enhanced 640px profile uses several detector passes and can take minutes on the CPU. Keep the app open until processing finishes.")
@@ -448,13 +487,24 @@ def render_process(catalog: dict, sources: list[Path]) -> None:
         result["analysis_profile_id"] = profile_id
         progress.progress(1.0, text="Tracking result saved")
         parent_run = output_dir.parent.parent if output_dir.parent.name == "comparisons" else output_dir
-        st.session_state["pending_selected_run"] = str(parent_run)
+        queue_review_run(parent_run)
         if upload_record:
             result["uploaded_source"] = {key: value for key, value in upload_record.items() if key != "upload_key"}
             (output_dir / "summary.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
         from driftlens.run_analysis_ui import save_shot_analysis
         save_shot_analysis(output_dir, result)
-        st.session_state["notice"] = f"Analyzed {number(result.get('frame_count')):g} sampled frames. Your replay and written analysis are in Shot review. Confirm lead and chase there to enable tandem separation measurements."
+        automatic_note = "Confirm one starting pair if automatic role order is unclear."
+        if automatic_roles:
+            progress.progress(.98, text="Finding the tandem and matching roles across views…")
+            try:
+                from driftlens.automatic_roles import automatic_clip_roles
+                outcome = automatic_clip_roles(output_dir)
+                result = outcome["summary"]
+                automatic_note = ("Automatic role proposals are ready. Inspect MATCH labels and unknown spans." if outcome["status"] == "matched" else outcome["proposal"]["reason"])
+            except Exception as error:
+                automatic_note = f"Detection is saved. Automatic role matching could not finish: {error}. Choose a clear seed pair in Shot review."
+            progress.progress(1.0, text="Detection and tandem checks saved")
+        st.session_state["notice"] = f"Analyzed {number(result.get('frame_count')):g} sampled frames. Your replay and written analysis are in Shot review. {automatic_note}"
         st.rerun()
     except Exception as error:
         progress.empty()
@@ -598,11 +648,7 @@ def render_evidence(catalog: dict, runs: list[tuple[Path, dict]], selected: tupl
 catalog = read_json(ROOT / "data" / "clip_catalog.json")
 runs = discover_runs()
 # A result link selects only an existing completed run inside this project.
-requested_run = st.query_params.get("run")
-linked_run = next((str(folder) for folder, _ in runs if folder.name == requested_run), None)
-if linked_run and st.session_state.get("linked_preview_run") != linked_run:
-    st.session_state["pending_selected_run"] = linked_run
-    st.session_state["linked_preview_run"] = linked_run
+linked_run = sync_requested_review_run(runs)
 sources = discover_sources(catalog)
 source_info = catalog.get("source") or {}
 

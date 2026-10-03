@@ -1,4 +1,4 @@
-"""Conservative CPU appearance hypotheses anchored only by reviewed pair crops.
+"""Conservative CPU identity hypotheses anchored by an attributed seed pair.
 
 Scores are histogram similarities, never probabilities or expert validation.
 This module assigns roles to existing observed detections, never makes boxes.
@@ -27,6 +27,10 @@ class IdentitySettings:
     max_seed_overlap_fraction: float = .08
     max_exemplars_per_role: int = 24
     min_track_support_samples: int = 3
+    neutral_saturation_ceiling: int = 60
+    min_consensus_similarity: float = .93
+    min_consensus_seed_similarity: float = .84
+    max_consensus_anchor_gap_seconds: float = 1.5
     hue_weight: float = .12
 
     def __post_init__(self):
@@ -36,12 +40,20 @@ class IdentitySettings:
             value = getattr(self, name)
             if not isinstance(value, (int, float)) or not math.isfinite(value) or not 0 <= value <= 1:
                 raise ValueError(f'{name} must be a finite value between zero and one.')
+        for name in ('min_consensus_similarity', 'min_consensus_seed_similarity'):
+            value = getattr(self, name)
+            if not isinstance(value, (int, float)) or not math.isfinite(value) or not 0 <= value <= 1:
+                raise ValueError(f'{name} must be a finite value between zero and one.')
+        if not math.isfinite(self.max_consensus_anchor_gap_seconds) or self.max_consensus_anchor_gap_seconds <= 0:
+            raise ValueError('Consensus anchor age must be a positive finite number.')
         for name in ('min_crop_dimension', 'max_exemplars_per_role'):
             value = getattr(self, name)
             if isinstance(value, bool) or not isinstance(value, int) or value < 2:
                 raise ValueError('Crop size and exemplar count must be integers of at least two.')
         if isinstance(self.min_track_support_samples, bool) or not isinstance(self.min_track_support_samples, int) or self.min_track_support_samples < 1:
             raise ValueError('Track support must be a positive integer sample count.')
+        if isinstance(self.neutral_saturation_ceiling, bool) or not isinstance(self.neutral_saturation_ceiling, int) or not 1 <= self.neutral_saturation_ceiling <= 255:
+            raise ValueError('Neutral saturation ceiling must be an HSV integer from one to255.')
 
 
 def _number(value, name):
@@ -80,30 +92,141 @@ def describe_crop(crop, settings=None):
         return None
     hsv = cv2.cvtColor(cv2.resize(crop, (96, 64), interpolation=cv2.INTER_AREA), cv2.COLOR_BGR2HSV)
     hue, saturation, value = np.moveaxis(hsv, -1, 0)
-    chromatic = (saturation >= 60) & (value >= 45)
-    dark = (value < 105) & ~chromatic
-    white = (value >= 170) & (saturation < 60)
-    gray = ~(chromatic | dark | white)
-    masses = np.zeros(15, dtype=np.float64)
-    for index in range(12):
-        masses[index] = np.mean(chromatic & (hue >= index * 15) & (hue < (index + 1) * 15))
-    masses[12:] = dark.mean(), gray.mean(), white.mean()
-    chromatic_fraction = float(masses[:12].sum())
-    hues = masses[:12] / max(chromatic_fraction, 1e-12)
-    return {'masses': masses, 'hues': hues, 'chromatic_fraction': chromatic_fraction}
+    # Mild blue or warm exposure casts on neutral body panels are not livery.
+    def histogram(ceiling):
+        chromatic = (saturation >= ceiling) & (value >= 45)
+        dark = (value < 105) & ~chromatic
+        white = (value >= 170) & (saturation < ceiling)
+        gray = ~(chromatic | dark | white)
+        masses = np.zeros(15, dtype=np.float64)
+        for index in range(12):
+            masses[index] = np.mean(chromatic & (hue >= index * 15) & (hue < (index + 1) * 15))
+        masses[12:] = dark.mean(), gray.mean(), white.mean()
+        chromatic_fraction = float(masses[:12].sum())
+        hues = masses[:12] / max(chromatic_fraction, 1e-12)
+        return {'masses': masses, 'hues': hues, 'chromatic_fraction': chromatic_fraction}
+    primary = histogram(settings.neutral_saturation_ceiling)
+    primary['neutral_cast'] = histogram(max(settings.neutral_saturation_ceiling, 100))
+    return primary
 
 
 def appearance_similarity(left, right, settings=None):
     settings = settings or IdentitySettings()
-    mass_score = float(np.sqrt(left['masses'] * right['masses']).sum())
-    hue_score = float(np.sqrt(left['hues'] * right['hues']).sum())
-    return (1 - settings.hue_weight) * mass_score + settings.hue_weight * hue_score
+    def compare(a, b):
+        mass_score = float(np.sqrt(a['masses'] * b['masses']).sum())
+        hue_score = float(np.sqrt(a['hues'] * b['hues']).sum())
+        hue_reliability = min(1., min(a['chromatic_fraction'], b['chromatic_fraction']) /
+                              max(settings.min_chromatic_fraction, 1e-12))
+        weight = settings.hue_weight * hue_reliability
+        return (1 - weight) * mass_score + weight * hue_score
+    return max(compare(left, right), compare(left.get('neutral_cast', left), right.get('neutral_cast', right)))
 
 
 def _prototype_score(feature, exemplars, settings):
     scores = sorted((appearance_similarity(feature, exemplar, settings) for exemplar in exemplars), reverse=True)
     # Require support from several confirmed examples; a single outlier cannot win.
     return float(np.mean(scores[:min(3, len(scores))]))
+
+
+def _geometry_continues(candidate, neighbours, clip_time):
+    close = [(abs(time - clip_time), row) for time, row in neighbours
+             if 0 < abs(time - clip_time) <= .35]
+    if not close:
+        return False
+    other = min(close, key=lambda item: item[0])[1]
+    box, previous = candidate['box'], other['box']
+    width, height = box[2] - box[0], box[3] - box[1]
+    pw, ph = previous[2] - previous[0], previous[3] - previous[1]
+    area_ratio, shape_ratio = width * height / (pw * ph), (width / height) / (pw / ph)
+    center_distance = math.hypot((box[0] + box[2] - previous[0] - previous[2]) / 2,
+                                 (box[1] + box[3] - previous[1] - previous[3]) / 2)
+    return .55 <= area_ratio <= 1.8 and .70 <= shape_ratio <= 1.4 and center_distance <= 1.5 * max(width, pw)
+
+
+def _local_consensus(decisions, by_frame, features, exemplars, settings):
+    """One frozen pass over strong role evidence; never iteratively grows banks."""
+    banks, observed_tracks = defaultdict(list), defaultdict(list)
+    for decision in decisions:
+        for candidate in by_frame[decision['frame_index']]:
+            observed_tracks[(decision['shot_index'], candidate['track_id'])].append((decision['clip_time'], candidate))
+        for role in ('lead', 'chase'):
+            identity = decision[f'{role}_id']
+            if identity is None:
+                continue
+            feature = features.get((decision['frame_index'], identity))
+            if feature is not None:
+                banks[(decision['shot_index'], identity, role)].append((decision['clip_time'], feature))
+    frozen = {}
+    for key, values in banks.items():
+        if len(values) < settings.min_track_support_samples:
+            continue
+        # Strong support must occur together, not merely accumulate isolated guesses.
+        times = [item[0] for item in values]
+        if not any(times[index + settings.min_track_support_samples - 1] - times[index] <= .5
+                   for index in range(len(times) - settings.min_track_support_samples + 1)):
+            continue
+        indices = np.linspace(0, len(values) - 1, min(len(values), 24)).round().astype(int)
+        frozen[key] = [values[index] for index in indices]
+    proposals = {}
+    for decision in decisions:
+        if decision['assignment_kind'] != 'automatic_appearance':
+            continue
+        candidates = by_frame[decision['frame_index']]
+        for role, other in (('lead', 'chase'), ('chase', 'lead')):
+            if decision[f'{role}_id'] is not None:
+                continue
+            eligible = []
+            for candidate in candidates:
+                key = (decision['shot_index'], candidate['track_id'], role)
+                anchors = frozen.get(key)
+                feature = features.get((decision['frame_index'], candidate['track_id']))
+                if anchors is None or feature is None or candidate['confidence'] < settings.min_confidence:
+                    continue
+                if min(abs(time - decision['clip_time']) for time, _ in anchors) > settings.max_consensus_anchor_gap_seconds:
+                    continue
+                if not _geometry_continues(candidate, observed_tracks[key[:2]], decision['clip_time']):
+                    continue
+                bank = [item[1] for item in anchors]
+                score = _prototype_score(feature, bank, settings)
+                seed_score = _prototype_score(feature, exemplars[role], settings)
+                rival_score = _prototype_score(feature, exemplars[other], settings)
+                if score < settings.min_consensus_similarity or seed_score < settings.min_consensus_seed_similarity or rival_score - seed_score > .015:
+                    continue
+                competitor_scores = [_prototype_score(other_feature, bank, settings)
+                                     for rival in candidates if rival['track_id'] != candidate['track_id']
+                                     and rival['confidence'] >= settings.min_confidence
+                                     and (other_feature := features.get((decision['frame_index'], rival['track_id']))) is not None]
+                margin = score - max(competitor_scores, default=0.)
+                if margin < settings.min_candidate_margin:
+                    continue
+                eligible.append((score, candidate, seed_score, seed_score - rival_score, margin))
+            if len(eligible) != 1:
+                continue
+            score, candidate, seed_score, role_margin, margin = eligible[0]
+            if decision[f'{other}_id'] == candidate['track_id']:
+                continue
+            proposals[(decision['frame_index'], role)] = (candidate['track_id'], score, seed_score, role_margin, margin)
+    added = 0
+    for decision in decisions:
+        for role in ('lead', 'chase'):
+            proposal = proposals.get((decision['frame_index'], role))
+            if proposal is None:
+                continue
+            identity, score, seed_score, role_margin, margin = proposal
+            decision[f'{role}_id'] = identity
+            decision[f'{role}_similarity'] = round(seed_score, 6)
+            decision[f'{role}_role_margin'] = round(role_margin, 6)
+            decision[f'{role}_candidate_margin'] = round(margin, 6)
+            decision[f'{role}_consensus_similarity'] = round(score, 6)
+            decision[f'{role}_reason'] = 'appearance_and_frozen_local_track_consensus'
+            added += 1
+        selected = [next((row for row in by_frame[decision['frame_index']] if row['track_id'] == decision[f'{role}_id']), None)
+                    for role in ('lead', 'chase')]
+        if all(selected) and (selected[0]['track_id'] == selected[1]['track_id'] or
+                              _overlap_fraction(selected[0]['box'], selected[1]['box']) > settings.max_pair_overlap_fraction):
+            decision['lead_id'] = decision['chase_id'] = None
+            decision['lead_reason'] = decision['chase_reason'] = 'overlapping_or_merged_pair_boxes'
+    return len(frozen), added
 
 
 def _read_features(source_path, frames, by_frame, settings):
@@ -156,8 +279,12 @@ def compress_decisions(decisions, duration_seconds):
         if intervals and intervals[-1]['_key'] == key:
             intervals[-1]['end_clip_seconds'] = end
         else:
-            basis = ('User selected seed pair; observed detections only.' if decision['assignment_kind'] == 'user_seed'
-                     else 'Automatic appearance hypothesis anchored to the selected pair; uncertain observations withheld; no expert validation.')
+            if decision['assignment_kind'] == 'user_seed':
+                basis = 'User selected seed pair; observed detections only.'
+            elif decision['assignment_kind'] == 'automatic_seed':
+                basis = 'Automatically proposed initial pair and travel order; unverified hypothesis, not a user or expert role review.'
+            else:
+                basis = 'Automatic appearance hypothesis anchored to the selected pair; uncertain observations withheld; no expert validation.'
             intervals.append({'start_clip_seconds': decision['clip_time'], 'end_clip_seconds': end,
                               'lead_id': decision['lead_id'], 'chase_id': decision['chase_id'],
                               'review_basis': basis, 'assignment_kind': decision['assignment_kind'], '_key': key})
@@ -166,17 +293,20 @@ def compress_decisions(decisions, duration_seconds):
     return intervals
 
 
-def suggest_role_intervals(source_path, frames, observations, seed_intervals, duration_seconds, settings=None):
+def suggest_role_intervals(source_path, frames, observations, seed_intervals, duration_seconds, settings=None, *, seed_origin='user_reviewed'):
     """Use immutable user seed exemplars to reconnect observed vehicle roles.
 
     Each nonseed sample is checked independently, so track reuse, fragmentation,
     camera changes and livery changes cannot silently inherit a previous role.
-    No new candidate is ever added to the exemplar bank.
+    Global seed exemplars remain immutable. One frozen pass of strongly matched
+    local observations may support weaker current crops, without iterative updates.
     """
     started = perf_counter()
     settings = settings or IdentitySettings()
     if isinstance(settings, dict):
         settings = IdentitySettings(**settings)
+    if seed_origin not in {'user_reviewed', 'automatic_motion'}:
+        raise ValueError('Seed origin must be user_reviewed or automatic_motion.')
     duration = _number(duration_seconds, 'Duration')
     if duration <= 0 or not frames:
         raise ValueError('Identity matching needs a positive duration and sampled frames.')
@@ -239,7 +369,7 @@ def suggest_role_intervals(source_path, frames, observations, seed_intervals, du
         if _overlap_fraction(pair[0]['box'], pair[1]['box']) > settings.max_seed_overlap_fraction:
             continue
         pair_features = [features.get((frame['frame_index'], candidate['track_id'])) for candidate in pair]
-        if any(feature is None or feature['chromatic_fraction'] < settings.min_chromatic_fraction for feature in pair_features):
+        if any(feature is None for feature in pair_features):
             continue
         for role, feature in zip(('lead', 'chase'), pair_features):
             exemplars[role].append(feature)
@@ -257,16 +387,17 @@ def suggest_role_intervals(source_path, frames, observations, seed_intervals, du
         decision = {**frame, 'lead_id': None, 'chase_id': None, 'lead_similarity': None,
                     'chase_similarity': None, 'lead_role_margin': None, 'chase_role_margin': None,
                     'lead_candidate_margin': None, 'chase_candidate_margin': None,
+                    'lead_consensus_similarity': None, 'chase_consensus_similarity': None,
                     'lead_reason': 'no_eligible_observation', 'chase_reason': 'no_eligible_observation',
                     'assignment_kind': 'automatic_appearance'}
         candidates = by_frame[frame['frame_index']]
         seed = seed_for_frame.get(frame['frame_index'])
         if seed:
-            decision['assignment_kind'] = 'user_seed'
+            decision['assignment_kind'] = 'user_seed' if seed_origin == 'user_reviewed' else 'automatic_seed'
             for role in ('lead', 'chase'):
                 if any(candidate['track_id'] == seed[f'{role}_id'] for candidate in candidates):
                     decision[f'{role}_id'] = seed[f'{role}_id']
-                    decision[f'{role}_reason'] = 'user_selected_seed'
+                    decision[f'{role}_reason'] = 'user_selected_seed' if seed_origin == 'user_reviewed' else 'automatically_proposed_seed'
                 else:
                     decision[f'{role}_reason'] = 'selected_seed_not_observed'
             pair = [next((candidate for candidate in candidates if candidate['track_id'] == decision[f'{role}_id']), None) for role in ('lead', 'chase')]
@@ -278,7 +409,7 @@ def suggest_role_intervals(source_path, frames, observations, seed_intervals, du
         scored = []
         for candidate in candidates:
             feature = features.get((frame['frame_index'], candidate['track_id']))
-            if candidate['confidence'] < settings.min_confidence or feature is None or feature['chromatic_fraction'] < settings.min_chromatic_fraction:
+            if candidate['confidence'] < settings.min_confidence or feature is None:
                 continue
             row = {**candidate, 'lead': _prototype_score(feature, exemplars['lead'], settings),
                    'chase': _prototype_score(feature, exemplars['chase'], settings)}
@@ -319,7 +450,7 @@ def suggest_role_intervals(source_path, frames, observations, seed_intervals, du
             if identity is not None:
                 track_roles[(decision['shot_index'], identity)][role] += 1
     for decision in decisions:
-        if decision['assignment_kind'] == 'user_seed':
+        if decision['assignment_kind'] in {'user_seed', 'automatic_seed'}:
             continue
         for role in ('lead', 'chase'):
             identity = decision[f'{role}_id']
@@ -333,10 +464,11 @@ def suggest_role_intervals(source_path, frames, observations, seed_intervals, du
             elif counts[role] < settings.min_track_support_samples:
                 decision[f'{role}_id'] = None
                 decision[f'{role}_reason'] = 'insufficient_temporal_support'
+    consensus_bank_count, consensus_proposals = _local_consensus(decisions, by_frame, features, exemplars, settings)
     intervals = compress_decisions(decisions, duration)
     automatic = [decision for decision in decisions if decision['assignment_kind'] == 'automatic_appearance']
-    report = {'method': 'immutable_reviewed_livery_histograms_v1', 'settings': asdict(settings),
-              'seed_intervals': seeds, 'seed_observation_counts': original_counts,
+    report = {'method': 'seed_livery_and_frozen_local_consensus_v2', 'settings': asdict(settings),
+              'seed_intervals': seeds, 'seed_origin': seed_origin, 'seed_observation_counts': original_counts,
               'exemplar_counts': {role: len(bank) for role, bank in exemplars.items()},
               'maximum_cross_role_seed_similarity': round(seed_similarity, 6),
               'sampled_frames': len(decisions), 'automatic_frames': len(automatic),
@@ -346,8 +478,12 @@ def suggest_role_intervals(source_path, frames, observations, seed_intervals, du
               'automatic_lead_unknown_frames': sum(decision['lead_id'] is None for decision in automatic),
               'automatic_chase_unknown_frames': sum(decision['chase_id'] is None for decision in automatic),
               'paired_frames': sum(decision['lead_id'] is not None and decision['chase_id'] is not None for decision in decisions),
+              'frozen_local_consensus_banks': consensus_bank_count,
+              'consensus_proposals_before_merged_box_veto': consensus_proposals,
+              'accepted_consensus_role_frames': sum(decision[f'{role}_id'] is not None and decision[f'{role}_reason'] == 'appearance_and_frozen_local_track_consensus'
+                                                     for decision in decisions for role in ('lead', 'chase')),
               'score_interpretation': 'Histogram similarity, not a correctness probability.',
               'validation_status': 'Algorithmic identity hypotheses require visual review; similar liveries and changed lighting can remain unknown or mismatch.',
-              'exemplar_update_policy': 'Only explicit user seed observations; automatic matches never update templates.',
+              'exemplar_update_policy': 'Global seed templates remain immutable. A single frozen bank of strongly supported within-view observations may validate current boxes; consensus matches never update either bank.',
               'processing_seconds': round(perf_counter() - started, 3)}
     return {'intervals': intervals, 'decisions': decisions, 'summary': report}
