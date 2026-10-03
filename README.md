@@ -1,8 +1,27 @@
 # DriftLens
 
-DriftLens V1 is a local computer vision tool for review assisted analysis of tandem drifting footage. Upload a private video, process a short interval, inspect the observed cars and correct lead and chase roles before reading the image separation chart. The dashboard also opens with a prepared complete run from launch through the visible finish across four camera views.
+DriftLens V1 is a local computer vision tool for review assisted analysis of tandem drifting footage. Upload a private video, process a short interval and review one reliable lead and chase pair. Appearance based role continuity can propose later identities after camera changes or tracker fragmentation. Inspect the automatic matches and unknown spans before reading the image separation chart. The dashboard also opens with a prepared complete run from launch through the visible finish across four camera views.
 
 The project lives separately from PitWall and the banking project. It uses a dedicated Python environment and stores its own inputs and outputs.
+
+## First setup from a clone
+
+1. Install Python 3.12 on Windows and make its Python launcher available.
+2. Download or clone the source into its own folder, such as `G:\DriftLens`.
+3. Double click `setup.cmd` and wait for the dedicated environment, free dependencies and pretrained model download to finish.
+4. Double click `launch.cmd` and open [the local dashboard](http://127.0.0.1:8510).
+5. Open Process a clip and upload your own permitted video. Saved example replays and source footage are private and are absent from a fresh clone.
+
+For an empty destination folder, PowerShell setup from the published repository is:
+
+```powershell
+git clone https://github.com/m11ahmed/DriftLens.git G:\DriftLensClone
+cd G:\DriftLensClone
+.\setup.cmd
+.\launch.cmd
+```
+
+Normal analysis runs locally after setup. The numerical reports describe the saved local experiments; they do not bundle the visual evidence or make every historical replay available in a clean checkout. [The local demo guide](docs/DEMO_GUIDE.md) contains manual PowerShell launch commands.
 
 ## Open the app
 
@@ -26,8 +45,9 @@ The Shot review tab retains the twelve original diagnostic clips and your own re
 4. Keep the selected analysis profile for the first comparison and enter a new Result name such as `my_first_test`.
 5. Choose Process clip locally and keep the terminal open until processing finishes.
 6. Open the result in Shot review. Check boxes, local tracker IDs, missing observations and the readable report against the visible cars.
-7. Open Correct roles within bounded clip intervals. Assign roles only where livery and travel order support them, with a separate decision for every camera view. Leave uncertain IDs empty.
-8. Save clip intervals and rebuild exports, then inspect the replay, image separation chart and downloadable report.
+7. Watch a clear initial interval and confirm which observed ID is lead and which is chase using livery and travel order.
+8. Open Follow lead and chase across views. Set Seed start seconds, Seed end seconds, Seed lead ID and Seed chase ID. Confirm I have checked lead and chase in the seed interval, then choose Follow this pair through the clip. No prior manual interval save is required.
+9. Inspect the resulting replay, image separation chart and downloadable report. Later automatic assignments are marked MATCH and remain unverified. Correct unsuitable matches in Correct roles within bounded clip intervals or seed another reliable interval when needed. Manual changes override the assignments, retain the diagnostics and deactivate continuity status.
 
 Uploads stay under `data/uploads` and results under `outputs/runs`. The analysis uses your CPU. A recorded 28 second test took about ten minutes before replay export and review, so process first and record the finished dashboard afterward. The sampling rate describes selected video frames and is different from processing speed.
 
@@ -53,11 +73,11 @@ The [Ultralytics tracking documentation](https://docs.ultralytics.com/modes/trac
 
 Screen separation is the distance between bounding box centres divided by their mean width. Camera position, zoom, perspective, and changing box sizes affect the value. It describes the image rather than physical distance.
 
-A missing observation or unknown role creates a gap in the chart. Tracker IDs are local to each camera shot. Lead and chase roles were visually reviewed by the AI assistant against source car livery and travel order, without human expert validation. Reviewed time intervals exclude ambiguous overlaps, parked vehicles and identity swaps. Role changes and camera cuts break chart lines. The project does not claim automatic identity association across cameras.
+A missing observation or unknown role creates a gap in the chart. Tracker IDs remain local observations. The prepared historical examples use roles visually reviewed by the AI assistant without human expert validation. The newer continuity feature starts from a reviewer supplied pair and compares observed car appearance after cuts or local ID changes. Later proposed labels display MATCH; match scores and margins describe heuristic evidence rather than identity probability. A match must pass similarity and competing match checks; uncertain cases remain unknown. These automatic proposals can be wrong when appearance changes, liveries are similar, cars overlap or the view is unfamiliar. Role changes and camera cuts still break chart lines, and no position is carried across hidden frames.
 
 Unassigned candidates can include background vehicles and false detections. Tandem separation uses only the reviewed participant roles with accepted current observations. A visible candidate label is different from a confirmed participating car.
 
-Uploaded clips use a bounded role editor beside the replay. Assign each interval after checking visible liveries and travel order, and split decisions at camera cuts. Saved corrections rebuild the replay, metrics, readable report and analysis JSON together. Unreviewed time stays unknown. The Complete run editor also supports a whole camera shot correction.
+Uploaded clips use a bounded role editor beside the replay. Review the initial identities and inspect continuity proposals beside their appearance evidence. The proposals assign roles to current observed IDs; they do not change detector boxes, retrain YOLO or prove physical identity. Saved corrections rebuild the replay, metrics, readable report and analysis JSON together. Rejected matches and missing observations stay unknown. The Complete run editor also supports a whole camera shot correction.
 
 This version does not estimate metres, vehicle speed, drift angle, judging scores, or driver skill. One detector candidate was fine tuned for twelve epochs. Its diagnostic test results regressed, so the original weights were preserved. The Evidence tab shows that experiment separately from the earlier tracker comparison. Upload support does not establish accuracy on every event or personal video.
 
@@ -97,4 +117,4 @@ Project source uses AGPL3. Ultralytics provides an [open source licensing option
 
 The test command is in the evaluation notes. Checks cover detection matching, identity comparisons, missing observations, complete source coverage, camera boundaries, role intervals, replay timestamp mapping and export recovery. Browser verification checks actual video playback, shot navigation, charts and downloaded exports.
 
-The completed V1 passed 122 tests and 80 subtests, plus an actual four second browser upload that detected its camera change and played the complete replay. Both preserved examples and report exports passed verification. Roles still need visual review on your own clip.
+The earlier V1 verification passed 122 tests and 80 subtests, plus an actual four second browser upload that detected its camera change and played the complete replay. Both preserved examples and report exports passed that check. Those counts predate the role continuity feature. Continuity requires a reviewed seed and visual checks on your own clip; it has no independent event benchmark.

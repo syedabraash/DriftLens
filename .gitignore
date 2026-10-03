@@ -32,3 +32,17 @@ outputs/visibility_diagnostic/
 
 outputs/upload_validation/
 /outputs/unseen_clip_test/
+
+# Private source media, visual derivatives and local credentials
+*.mov
+*.m4v
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+.env
+.env.*
+!.env.example
+data/raw/
+data/videos/

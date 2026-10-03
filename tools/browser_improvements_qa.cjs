@@ -2,7 +2,10 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { chromium } = require(process.env.DRIFTLENS_PLAYWRIGHT_PATH || 'C:/Users/m10ah/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+let playwright;
+try { playwright = require('playwright'); }
+catch { playwright = require(process.env.DRIFTLENS_PLAYWRIGHT_PATH || path.join(process.env.USERPROFILE || '', '.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright')); }
+const { chromium } = playwright;
 const root = process.env.DRIFTLENS_PROJECT_ROOT || 'G:/DriftLens';
 const output = path.join(root, 'outputs/screenshots/improvements');
 const checks = { checked_at: new Date().toISOString(), uploaded_test_scope: 'Private two second source excerpt; not an independent or personal-footage accuracy benchmark' };
@@ -31,7 +34,7 @@ async function download(page, panel, label, suffix) {
 }
 (async () => {
   fs.mkdirSync(output, { recursive: true });
-  const browser = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true, args: ['--disable-gpu', '--no-first-run'] });
+  const browser = await chromium.launch({ executablePath: process.env.DRIFTLENS_CHROME_PATH || path.join(process.env.ProgramFiles || 'C:/Program Files', 'Google/Chrome/Application/chrome.exe'), headless: true, args: ['--disable-gpu', '--no-first-run'] });
   try {
     const context = await browser.newContext({ viewport: { width: 1440, height: 1080 }, acceptDownloads: true });
     const page = await context.newPage();

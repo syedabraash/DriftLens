@@ -11,7 +11,7 @@ import numpy as np
 
 
 CAMERA_CUT_SETTINGS = {
-    "method": "brightness_residual_and_motion_continuity_v1",
+    "method": "brightness_residual_and_interior_motion_continuity_v2",
     "sample_size": [192, 108],
     "min_structure_residual": 0.10,
     "max_motion_inlier_fraction": 0.10,
@@ -20,6 +20,7 @@ CAMERA_CUT_SETTINGS = {
     "max_forward_backward_error_pixels": 1.5,
     "ransac_error_pixels": 2.0,
     "optical_flow_pyramid_levels": [3, 1],
+    "motion_support_region": [0.05, 0.05, 0.95, 0.80],
 }
 
 
@@ -58,9 +59,18 @@ def compare_samples(previous: np.ndarray, current: np.ndarray) -> dict:
         metrics["is_cut"] = False
         return metrics
     metrics["motion_checked"] = True
+    # Player controls, operating system taskbars and broadcast edge overlays can
+    # stay perfectly still across a real camera change. They must not establish
+    # continuity of the video content. Keep a broad fixed normalized interior;
+    # detector coordinates and the saved replay remain the original full frame.
+    h, w = previous.shape
+    x1, y1, x2, y2 = CAMERA_CUT_SETTINGS["motion_support_region"]
+    mask = np.zeros_like(previous, dtype=np.uint8)
+    mask[round(y1*h):round(y2*h), round(x1*w):round(x2*w)] = 255
     corners = cv2.goodFeaturesToTrack(
         previous, maxCorners=CAMERA_CUT_SETTINGS["max_corners"],
         qualityLevel=0.01, minDistance=CAMERA_CUT_SETTINGS["min_corner_distance"],
+        mask=mask,
     )
     if corners is not None:
         metrics["previous_corners"] = len(corners)

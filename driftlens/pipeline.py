@@ -441,7 +441,7 @@ def _analyze_video(source: Path, output_dir: Path, start_seconds: float, end_sec
     summary["clip_id"] = clip_id
     summary["files"]["detections"] = "detections.csv"
     summary["pipeline_revision"] = 2
-    summary["visibility_revision"] = 3
+    summary["visibility_revision"] = 4
     summary["camera_cut_settings"] = dict(CAMERA_CUT_SETTINGS)
     summary["detected_camera_cuts_seconds"] = cut_boundaries
     summary["agnostic_nms"] = bool(agnostic_nms)
@@ -519,6 +519,10 @@ def render_run(run_dir: Path, summary: dict, observations: list[dict], frames: l
                 x1, y1, x2, y2 = [round(float(row[key])) for key in ("x1", "y1", "x2", "y2")]
                 cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
                 text = f"{role}  ID {identifier}  {float(row['confidence']):.2f}"
+                continuation = summary.get("role_continuation") or {}
+                is_seed = any(float(seed["start_clip_seconds"]) <= float(frame_record["clip_time"]) < float(seed["end_clip_seconds"]) for seed in continuation.get("seed_intervals", []))
+                if continuation.get("active") and (lead or chase) and not is_seed:
+                    text += "  MATCH"
                 if row.get("detection_method") == "temporal_appearance_class_recovery":
                     text += f"  R class {row['source_class_id']}"
                 cv2.putText(image, text, (max(4, x1), max(36, y1 - 8)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2, cv2.LINE_AA)

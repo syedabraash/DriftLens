@@ -11,6 +11,17 @@ DriftLens V1 runs locally with free tools and its own Python environment. It pro
 3. If the launcher says its environment is missing, run `setup.cmd` from the same folder and then launch again. The current environment is already installed; setup only needs to be repeated if it is absent. Initial setup downloads free dependencies and model weights.
 4. To stop the app when finished, close the launcher terminal or press Ctrl+C in it.
 
+## Launch manually in PowerShell
+
+Open PowerShell and run:
+
+```powershell
+cd G:\DriftLens
+.\.venv\Scripts\python.exe -m streamlit run app.py --server.address 127.0.0.1 --server.port 8510 --browser.gatherUsageStats false
+```
+
+This uses the dedicated project environment without activating it. Keep PowerShell open while using the dashboard and press **Ctrl+C** to stop it. If another DriftLens session occupies port 8510, stop that session or choose `--server.port 8511` and open `http://127.0.0.1:8511`.
+
 ## Upload your first test
 
 1. Use an existing video you own or have permission to use. For a public demonstration, also confirm permission to publish the footage. Prefer a clear continuous view with both participating cars visible.
@@ -19,11 +30,12 @@ DriftLens V1 runs locally with free tools and its own Python environment. It pro
 4. Keep **Enhanced observed car recovery** for an initial comparison with the prepared demonstration. It uses the CPU and can be slow. The **Original 416 pixel diagnostic** profile is a simpler alternative, with different settings and without experimental appearance recovery; its results need their own review.
 5. Enter a new **Result name**, such as `my_first_test`, and select **Process clip locally**. Keep the terminal open until processing completes.
 6. Open the saved result in **Shot review**. Watch the replay and check whether boxes represent the participants, background vehicles, overlaps or false detections. A single car clip can test detection, but tandem measurements require two observed cars and accepted roles.
-7. Open **Correct roles within bounded clip intervals**. Check visible livery and travel order, then assign different observed IDs to lead and chase only within supported intervals. Make separate decisions for each camera view. Unknown IDs and uncovered times stay empty; any recovered class marked R needs inspection.
-8. Select **Save clip intervals and rebuild exports**. Read the chart and report against the replay. A missing participant or uncertain role should appear as an unavailable measurement.
-9. Export the readable report and CSV or JSON results. The private upload is under `G:\DriftLens\data\uploads` and its result under `G:\DriftLens\outputs\runs`.
+7. Watch a clear initial interval. Check livery and travel order and note the different observed lead and chase IDs. A prior manual interval save is not required. Any recovered class marked R needs inspection.
+8. Open **Follow lead and chase across views** and enter **Seed start seconds**, **Seed end seconds**, **Seed lead ID** and **Seed chase ID**. Confirm **I have checked lead and chase in the seed interval**, then select **Follow this pair through the clip**. Inspect the replay and matching evidence across camera changes and ID fragmentation. Later role labels display **MATCH** and are algorithmic, unverified assignments. Scores and margins are not identity probabilities.
+9. The continuity action rebuilds the exports. Read the chart and report against the replay. Correct a poor match in **Correct roles within bounded clip intervals**, or use another reliable seed. Manual role edits override the automatic assignments and deactivate continuity status while retaining match diagnostics. A missing participant or uncertain role should appear as an unavailable measurement.
+10. Export the readable report and CSV or JSON results. The private upload is under `G:\DriftLens\data\uploads` and its result under `G:\DriftLens\outputs\runs`.
 
-Inspect camera boundaries against the actual video. The cut safeguard is a heuristic; it may miss or add a boundary on unfamiliar footage. If a view change is not represented correctly, use a shorter continuous source interval for the first test and keep the failure as evidence. Tracker IDs are local observations, not guaranteed physical identity through a cut. Role review does not repair missed detections or turn assistant decisions into expert labels.
+Inspect camera boundaries against the actual video. The cut safeguard is a heuristic; it may miss or add a boundary on unfamiliar footage. Tracker IDs are local observations, not guaranteed physical identity through a cut. The continuity step uses the reviewed seed's appearance to propose roles for later observed IDs, including when an ID changes inside a view. It cannot recover an invisible car or prove an appearance match correct. Inspect unmatched and uncertain spans, and keep failures as evidence. Role review does not repair missed detections or turn automatic proposals into expert labels.
 
 The original 28 second uploaded test took 611.995 seconds of CPU processing before export and visual review, about ten minutes, under its recorded workload and settings. Your wait can differ. Complete processing and role review before recording, and say the demonstration shows a prepared result. A 10 fps sampling setting does not mean real time analysis.
 
@@ -38,14 +50,14 @@ If you already have a compatible OBS Studio installation, use its **Auto Configu
 Suggested 45 to 60 second walkthrough:
 
 1. **0 to 8 seconds:** Introduce DriftLens as a local computer vision project for review assisted tandem analysis. Show the completed result name.
-2. **8 to 25 seconds:** Play the annotated clip. Point out boxes, local IDs and reviewed lead and chase roles.
+2. **8 to 25 seconds:** Play the annotated clip across a camera change. Show that a reviewed seed supports later automatic role proposals, and point out the local IDs and remaining unknowns.
 3. **25 to 40 seconds:** Show the image separation chart and one missing or uncertain interval. Explain that unavailable observations remain gaps.
 4. **40 to 50 seconds:** Show the readable report and numerical export controls.
 5. **50 to 60 seconds:** State that processing happens offline, roles require review and independent evaluation on more events is future work.
 
 Optional narration:
 
-> I built DriftLens to review tandem drifting videos with local computer vision. After offline processing, I check the observed cars and assign roles within each camera view. The replay and image separation chart make both accepted observations and missing measurements visible. I can export the report and data for review. The current version needs manual role checks, and broader event validation is the next step.
+> I built DriftLens to review tandem drifting videos with local computer vision. After offline processing, I review a reliable lead and chase pair. The app then compares visible car appearance to propose later roles when the camera or local track ID changes. I inspect those matches, and uncertain or missing observations remain gaps. The replay, image separation chart and exported report support that review. Independent evaluation across more events is still future work.
 
 ## Footage for LinkedIn
 
@@ -55,9 +67,9 @@ Paste ready post text:
 
 > I built DriftLens, a local computer vision tool for reviewing tandem drifting videos.
 >
-> It combines vehicle detection and tracking with replay review, manual lead and chase corrections, an image separation timeline and downloadable reports. Missing or uncertain observations remain explicit gaps.
+> It combines vehicle detection and tracking with a reviewed initial lead and chase pair, appearance based role continuity across camera changes, editable intervals, an image separation timeline and downloadable reports. Missing or uncertain observations remain explicit gaps.
 >
-> Built with Python, OpenCV, YOLO, BoTSORT and Streamlit. The current V1 supports private video uploads and offline processing. It needs visual role review, and evaluation across more events is future work.
+> Built with Python, OpenCV, YOLO, BoTSORT and Streamlit. V1 supports private video uploads and offline processing. Appearance matches still need visual checks, and independent evaluation across more events is future work.
 >
 > #ComputerVision #Python #MachineLearning #PortfolioProject
 

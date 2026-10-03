@@ -255,6 +255,8 @@ def render_charts(metrics: pd.DataFrame) -> None:
 def render_roles(run_dir: Path, summary: dict, observations: pd.DataFrame) -> None:
     from driftlens.clip_role_review import render_clip_role_editor
     render_clip_role_editor(run_dir, summary, observations)
+    from driftlens.role_continuity import render_role_continuity
+    render_role_continuity(run_dir, summary)
 
 
 def render_review(runs: list[tuple[Path, dict]]) -> tuple[Path, dict] | None:
@@ -283,10 +285,12 @@ def render_review(runs: list[tuple[Path, dict]]) -> tuple[Path, dict] | None:
     columns[0].metric("Clip duration", f"{number(summary.get('duration_seconds')):.1f}s")
     columns[1].metric("Sampled frames", frames)
     columns[2].metric("Pair observed", f"{100 * paired / frames:.1f}%" if roles_ready and frames else "Assign roles")
-    columns[3].metric("Processing speed", f"{number(summary.get('processing_fps')):.2f} fps")
+    columns[3].metric("Cached tracking speed" if summary.get("processing_mode", "").startswith("cached_") else "Processing speed", f"{number(summary.get('processing_fps')):.2f} fps")
     st.caption(f"{summary.get('tracker', 'Tracker')} · {int(number(summary.get('imgsz')))}px inference · sampled at {number(summary.get('sampled_fps')):g} fps · source {short_time(summary.get('start_seconds'))} to {short_time(summary.get('end_seconds'))}")
+    if summary.get("processing_mode", "").startswith("cached_"):
+        st.caption(f"This result reuses saved detector predictions. Original analysis took {number(summary.get('original_inference_processing_seconds')):.1f}s; this tracking update took {number(summary.get('processing_seconds')):.1f}s. Its speed excludes model inference.")
     if number(summary.get("shot_count"), 1) > 1:
-        st.warning("This clip contains multiple camera views. Review lead and chase independently in each view using the bounded role editor. Check the boundaries against the replay.")
+        st.warning("This clip contains multiple camera views. Use Follow lead and chase across views to continue a reviewed pair, then inspect the automatic matches and correct uncertain intervals. Check camera boundaries against the replay.")
     reference_check = read_json(run_dir / "evaluation.json")
     sparse_changes = int(number((reference_check.get("tracking") or {}).get("identity_switches")))
     if sparse_changes:
@@ -300,7 +304,9 @@ def render_review(runs: list[tuple[Path, dict]]) -> tuple[Path, dict] | None:
         else:
             st.warning("The annotated video is missing from this result.")
         render_roles(run_dir, summary, observations)
-        if summary.get("role_review_status") == "user_assignment_unverified":
+        if summary.get("role_review_status") == "automatic_appearance_unverified":
+            st.caption("The seed pair was reviewed by the user. Later roles are automatic appearance matches, marked MATCH in the replay, and need visual review. Uncertain matches stay unassigned.")
+        elif summary.get("role_review_status") == "user_assignment_unverified":
             st.caption("These roles are your saved visual assignments and have no human expert validation.")
         elif summary.get("role_assignment_method"):
             st.caption("Initial roles were visually reviewed by the AI assistant without human expert validation. Check the participating cars during playback.")

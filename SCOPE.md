@@ -8,7 +8,7 @@ DriftLens V1 is an implemented local, review assisted tandem tracking and run re
 
 Convert a complete real tandem run into a combined replay, an explicitly segmented observation timeline, an image separation chart and reproducible diagnostic evidence. The technical question is how consistently a small pretrained detector and tracker preserve the two vehicle identities through smoke and overlap.
 
-V1 includes private bounded uploads, observed detection and tracking, replay review, explicit role corrections and CSV, JSON and readable report exports. A reviewer checks participants independently in each view; the tool does not promise automatic roles, physical telemetry or reliable identities on arbitrary footage. Users can test their own videos locally, but personal footage and other events have not yet been independently evaluated. `docs/DEMO_GUIDE.md` explains testing and recording the finished result.
+V1 includes private bounded uploads, observed detection and tracking, replay review, explicit role corrections, seed based appearance continuity and CSV, JSON and readable report exports. A reviewer identifies a reliable initial pair; conservative automatic proposals can then assign later observed IDs across camera views or tracker fragmentation. The tool does not infer lead and chase from tracker numbering, provide physical telemetry or guarantee identities on arbitrary footage. Users can test their own videos locally, but personal footage and other events have not yet been independently evaluated. `docs/DEMO_GUIDE.md` explains testing and recording the finished result.
 
 The default demonstration covers 1904.5 through 1931.2 seconds of the source, with four contiguous camera shots. It includes 26.7 seconds of broadcast coverage from launch and initiation through the visible finish. Independent sampling of the four shots produces a 26.8 second replay with 268 frames. Exact source and replay timestamps remain available separately.
 
@@ -16,7 +16,7 @@ The default demonstration covers 1904.5 through 1931.2 seconds of the source, wi
 
 1. Select a local video and a bounded source interval in the Streamlit interface or command line.
 2. Run pretrained YOLOv8n detection on the CPU and associate observations using ByteTrack or BoT SORT.
-3. Inspect the annotated replay and assign two different tracker IDs to lead and chase.
+3. Inspect the annotated replay and seed two different observed tracker IDs as lead and chase. Propose later role assignments using appearance, inspect the evidence and correct unsuitable matches.
 4. Display bounding boxes, IDs, assigned roles, confidence and observed trajectories.
 5. Compute detected image center separation divided by the mean detected box width when both selected cars are observed.
 6. Leave missing observations and separation values unknown rather than drawing hidden positions as measured facts.
@@ -53,9 +53,9 @@ Sparse samples do not prove continuous tracking quality between labelled frames 
 
 The separation chart measures a perspective dependent image proxy. It does not measure physical gap, vehicle speed, drift angle, judging proximity or driver skill. Such quantities need a separately calibrated and validated method.
 
-The application does not produce official Formula Drift scores or identify driver names. Lead and chase are reviewer supplied roles. Initial visual role suggestions are attributed in the manifest and need review. Track IDs do not establish physical identity on their own, especially after smoke or overlap.
+The application does not produce official Formula Drift scores or identify driver names. The initial lead and chase pair is reviewer supplied. Later role continuity proposals are attributed as automatic appearance matches, with their seed, settings and uncertainty retained separately from manual review. Track IDs and similarity scores do not establish physical identity or calibrated identity probability, especially after smoke or overlap.
 
-Prefer one continuous camera shot for an initial upload test. The full run manifest joins ordered, contiguous shots into a complete review. Every view has independently reviewed roles and local IDs. Explicit visual role intervals exclude ambiguous observations and allow known fragments to be reviewed without pretending uninterrupted identity. Cuts, unknown gaps and role mapping changes break chart lines. The cut safeguard resets tracking across detected cuts but does not reconnect identities across views. Unassigned candidates can include native background vehicle predictions and false boxes; only accepted observations of the reviewed pair enter tandem measurements.
+Prefer one continuous camera shot for an initial upload test. The full run manifest joins ordered, contiguous shots into a complete review. Every view has independently reviewed roles and local IDs. Explicit visual role intervals exclude ambiguous observations and allow known fragments to be reviewed without pretending uninterrupted identity. Cuts, unknown gaps and role mapping changes break chart lines. The cut safeguard resets tracking across detected cuts. The separate continuity step compares visible participant appearance against reviewed seeds to propose roles for later current IDs. It withholds weak or competing matches and does not reconnect hidden positions. Unassigned candidates can include native background vehicle predictions and false boxes; only accepted observations of the reviewed pair enter tandem measurements.
 
 The complete run reuses material from the existing test broadcast and is a demonstration rather than additional independent evaluation. Saved role intervals apply only to the pinned source, weights and BoTSORT 640 pixel profile. Other tracker or inference settings need fresh role review.
 
@@ -70,3 +70,9 @@ The implementation uses free local Python tools, OpenCV, PyTorch, Ultralytics YO
 Source code, the detector and its dependencies have their own licences; those do not grant rights to the footage. Follow the applicable open source terms when publishing project code. Do not introduce a paid service or API without a new explicit user request.
 
 Every project README must contain no dash characters. Validate that rule when creating or editing README files. Keep this project's code, data, environment, weights and outputs separate from PitWall and the banking project.
+
+## Role continuity evidence boundary
+
+The continuity feature is a bounded heuristic built from observed crop appearance, not a new trained reidentification network. Similarity and ambiguity gates reduce unsupported assignments but cannot eliminate appearance mistakes or participant swaps. New view decisions remain inspectable and editable, and unknown or missing observations do not contribute to tandem separation.
+
+The user's uploaded `test` clip exposed the camera and identity issue and now guides the implementation. It is a regression and tuning example, not an untouched independent evaluation. Historical complete demo results, sparse labels and unsuccessful training evidence remain frozen. No new expert review or broader event accuracy is established by adding this feature.

@@ -11,7 +11,7 @@ import uuid
 import pandas as pd
 import streamlit as st
 
-from .review import derive_frame_metrics, read_rows, validate_role_intervals, write_metrics
+from .review import derive_frame_metrics, read_rows, roles_at, validate_role_intervals, write_metrics
 
 
 def _finite(value, name: str) -> float:
@@ -101,7 +101,12 @@ def _validated_inputs(summary: dict, frames: list[dict], observations: list[dict
 
 
 def update_clip_role_intervals(run_dir: Path, intervals: list[dict]) -> dict:
-    """Rebuild every derived clip export from observed boxes, with rollback."""
+    """Explicit manual corrections override automatic continuation."""
+    return _publish_clip_role_intervals(run_dir, intervals)
+
+
+def _publish_clip_role_intervals(run_dir: Path, intervals: list[dict], *, continuation: dict | None = None, decisions: list[dict] | None = None) -> dict:
+    """Rebuild every derived clip export and match evidence with rollback."""
     from .pipeline import render_run
     from .run_analysis_ui import save_shot_analysis
 
@@ -119,10 +124,26 @@ def update_clip_role_intervals(run_dir: Path, intervals: list[dict]) -> dict:
                    pair_coverage=sum(row["pair_observed"] for row in metrics) / len(metrics))
     revised["files"] = {**revised.get("files", {}), "video": "annotated.mp4", "metrics": "frame_metrics.csv",
                         "analysis": "analysis.json", "report": "report.txt", "summary": "summary.json"}
+    if continuation is not None:
+        if not isinstance(decisions, list) or len(decisions) != len(frames):
+            raise ValueError("Automatic role evidence must cover every sampled frame.")
+        for frame, decision in zip(frames, decisions):
+            time = float(frame["clip_time"])
+            if _id(decision.get("frame_index")) != int(frame["frame_index"]) or abs(_finite(decision.get("clip_time"), "Match time") - time) > .001:
+                raise ValueError("Role match evidence disagrees with the sampled frame timeline.")
+            expected = roles_at({"role_intervals": canonical}, time)
+            if tuple(_id(decision.get(key)) for key in ("lead_id", "chase_id")) != expected:
+                raise ValueError("Role match evidence disagrees with the published interval map.")
+        revised.update(role_review_status="automatic_appearance_unverified",
+                       role_assignment_method="User reviewed the seed pair; later role IDs are automatic appearance hypotheses without expert validation.",
+                       role_continuation=continuation)
+        revised["files"]["role_matches"] = "role_matches.json"
+    elif revised.get("role_continuation"):
+        revised["role_continuation"] = {**revised["role_continuation"], "active": False, "override": "User saved manual role intervals."}
     stage = (run_dir / f".clip_roles_{uuid.uuid4().hex}").resolve()
     stage.relative_to(run_dir)
     stage.mkdir()
-    names = ("annotated.mp4", "frame_metrics.csv", "analysis.json", "report.txt", "summary.json")
+    names = ("annotated.mp4", "frame_metrics.csv", "analysis.json", "report.txt", "summary.json") + (("role_matches.json",) if continuation is not None else ())
     preserve_stage = False
     try:
         # Reports inspect the same current box evidence as the renderer. Source
@@ -132,6 +153,8 @@ def update_clip_role_intervals(run_dir: Path, intervals: list[dict]) -> dict:
             original.relative_to(run_dir)
             if original.is_file():
                 shutil.copyfile(original, stage / name)
+        if continuation is not None:
+            (stage / "role_matches.json").write_text(json.dumps({"method": continuation["method"], "score_note": continuation["score_note"], "frames": decisions}, indent=2, allow_nan=False) + "\n", encoding="utf-8")
         write_metrics(stage / "frame_metrics.csv", metrics)
         render_run(stage, revised, observations, frames)
         revised = save_shot_analysis(stage, revised)

@@ -86,6 +86,29 @@ class CameraCutTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             detector.update(np.empty((0, 0), dtype=np.uint8))
 
+    def test_stationary_player_controls_do_not_hide_a_content_cut(self):
+        first = textured_scene(101)
+        second = np.flip(first, (0, 1)).copy()
+        # Dense perfectly static control icons occupy the bottom screen strip.
+        # They provide real optical-flow matches, but say nothing about whether
+        # the racing camera changed above them.
+        controls = textured_scene(6)[86:]
+        first[86:] = controls
+        second[86:] = controls
+        detector = CameraCutDetector()
+        detector.update(first)
+        self.assertTrue(detector.update(second))
+
+    def test_screen_recorded_pan_still_keeps_interior_motion_support(self):
+        first = textured_scene(51)
+        transform = cv2.getRotationMatrix2D((96, 54), 2, 1.04)
+        transform[:, 2] += (7, -2)
+        current = cv2.warpAffine(first, transform, (192, 108), borderMode=cv2.BORDER_REFLECT)
+        controls = textured_scene(6)[86:]
+        first[86:] = controls
+        current[86:] = controls
+        self.assertFalse(compare_samples(first, current)["is_cut"])
+
 
 if __name__ == "__main__":
     unittest.main()

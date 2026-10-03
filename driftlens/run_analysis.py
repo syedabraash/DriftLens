@@ -316,6 +316,12 @@ def build_run_analysis(summary: dict, timeline_rows: Iterable[dict] | Any,
     report["box_provenance"] = _provenance_totals(evidence_by_shot or {}, rows, summary.get("source_class_names") or {})
     report["accepted_paired_samples_with_recovery"] = sum(row["accepted"] and row["pair_uses_recovered_box"] is True for row in rows)
     report["conclusions"] = _conclusions(report)
+    continuation = summary.get("role_continuation") or {}
+    if continuation.get("active"):
+        report["role_continuation"] = continuation
+        note = "The seed pair was reviewed by the user; later roles are unverified appearance matches. Similarity scores and margins are not calibrated identity probabilities. Ambiguous matches remain unknown and manual corrections override the automatic map."
+        report["conclusions"].append(note)
+        report["limitations"].append(note)
     if summary.get("recover_vehicle_classes") or (summary.get("inference_profile") or {}).get("recover_vehicle_classes"):
         report["limitations"].append("This profile can recover current nonvehicle class boxes through conservative temporal vehicle appearance matches. Original predicted classes and recovery evidence are exported separately. Recovery is an experimental identity hypothesis, not human verified vehicle classification.")
     if report["box_provenance"]["recovered_selected_boxes"] or summary.get("recover_vehicle_classes") or (summary.get("inference_profile") or {}).get("recover_vehicle_classes"):

@@ -2,7 +2,7 @@
 
 Updated on 3 October 2026.
 
-V1 provides local private uploads, observed vehicle tracking, replay review, bounded lead and chase corrections, image separation with explicit gaps, a readable report and numerical exports. It uses the original pretrained detector. The twelve epoch candidate regressed on the saved diagnostic test and remains inactive.
+V1 provides local private uploads, observed vehicle tracking, replay review, bounded lead and chase corrections, reviewed seed appearance continuity across local ID and camera changes, image separation with explicit gaps, a readable report and numerical exports. It uses the original pretrained detector. The twelve epoch candidate regressed on the saved diagnostic test and remains inactive.
 
 ## Run and test locally
 
@@ -10,7 +10,7 @@ V1 provides local private uploads, observed vehicle tracking, replay review, bou
 2. Keep its terminal open and open [the dashboard](http://127.0.0.1:8510).
 3. In **Process a clip**, choose **Upload my video**. Begin with a ten to fifteen second continuous view showing both cars, under 200 MB. The analysis interval is capped at 60 seconds.
 4. Enter a new result name and select **Process clip locally**. Let processing finish before recording a demo.
-5. In **Shot review**, inspect boxes and local tracker IDs against visible livery and travel order. Correct bounded roles separately within each view, preserve unknown time and rebuild exports.
+5. In **Shot review**, inspect boxes and local tracker IDs against visible livery and travel order. Watch a reliable initial pair, open **Follow lead and chase across views**, fill its four seed fields and confirm **I have checked lead and chase in the seed interval**. Choose **Follow this pair through the clip** to match later roles, inspect **MATCH** labels and appearance evidence, and preserve unknown spans. No prior manual interval save is required. Correct unsuitable intervals and rebuild exports.
 6. Read the replay, image separation chart, missing observations and report together. Export the report and numerical evidence.
 
 Use [the demo guide](docs/DEMO_GUIDE.md) for recording steps, a 45 to 60 second walkthrough and paste ready LinkedIn wording. A single car video can exercise upload and detection, but paired tandem measurements require two observed participants and reviewed roles.
@@ -21,7 +21,7 @@ The reused enhanced complete demo has 191 accepted pairs in 268 samples, or 71.3
 
 The final safeguard found all six reviewed cuts with no other flags across direct scans of these two complete intervals. Historical stitched replay counts, IDs and pair totals remain preserved. Screening the saved appearance recovery candidates rejected the inspected curb and bin artifacts while retaining inspected car recoveries; native false candidates still need review. These checks address known failures and do not establish accuracy on arbitrary footage.
 
-No human expert labels or independent personal video evaluation have been completed. A reviewer must still inspect camera boundaries, identities, background false detections and overlaps. The chart reports a perspective dependent image proxy, without physical distance, throttle, brake, speed, drift angle or official scores.
+The user's `test` upload now guides the continuity repair and is a tuning and regression case. Appearance continuity is not a new trained detector or an independent identity benchmark. No human expert labels or independent personal video evaluation have been completed. A reviewer must still inspect camera boundaries, identities, background false detections and overlaps. The chart reports a perspective dependent image proxy, without physical distance, throttle, brake, speed, drift angle or official scores.
 
 ## Future quality work
 
