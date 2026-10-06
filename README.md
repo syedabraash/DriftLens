@@ -15,7 +15,7 @@ The project lives separately from PitWall and the banking project. It uses a ded
 For an empty destination folder, PowerShell setup from the published repository is:
 
 ```powershell
-git clone https://github.com/m11ahmed/DriftLens.git G:\DriftLensClone
+git clone https://github.com/m11ahmed/DriftLens.git
 cd G:\DriftLensClone
 .\setup.cmd
 .\launch.cmd
